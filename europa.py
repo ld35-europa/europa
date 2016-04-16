@@ -7,6 +7,7 @@ import math
 
 from random import random
 from pygame import Rect
+from pygame import Surface
 
 JUMPLEN = 200
 JUMPH_MULT = 2.5
@@ -14,6 +15,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
+TRANSPARENT = (0, 0, 0, 255)
 
 def main():
 	pygame.init()
@@ -31,8 +33,10 @@ def main():
 
 	charrect.bottom=h
 
-	wallrect = Rect(200, 300, 150, h-300)
-	sculpt_wall(screen, wallrect)
+	wall = sculpt_obstacle(150, 300)
+	screen.blit(wall, (450, h-300))
+	wall = sculpt_obstacle(225, 200)
+	screen.blit(wall, (150, h-200))
 
 	while 1:
 		for e in pygame.event.get():
@@ -62,21 +66,26 @@ def main():
 		pygame.display.flip()
 		time.sleep(1.0/30)
 
-def sculpt_wall(screen, rect):
+def sculpt_obstacle(w, h):
 
-	# Sculpt a wall within the passed rect by subtracting from
-	# each pixel column, in the left hand side and right hand side
-	# of the rect separately. YVAR is the maximum variability from
-	# a straight diagonal line (to either side), Y_BIAS_MULT determines
-	# how flat-topped the obstacles are.
+	# Sculpt a wall into a surface (width w, height w), initially
+	# a solid block, by subtracting from each pixel column, in the
+	# left hand side and right hand side of the rect separately.
+	# YVAR is the maximum variability from a straight diagonal
+	# line (to either side), Y_BIAS_MULT determines how flat-
+	# topped the obstacles are. Returns the surface.
 
-	lhs, rhs = split_rect_vert(rect)
-	drop = float(rhs.height) / rhs.width
+	sfc = Surface((w, h))
+	lhs, rhs = split_rect_vert(Rect(0, 0, w, h))
+	drop_per_x = float(rhs.height) / rhs.width
+	walltxt = pygame.image.load("assets/img/wall2.png")
 
 	YVAR = 10
-	Y_BIAS_MULT = 1.8
+	Y_BIAS_MULT = 2.0
 
-	screen.fill(RED, rect)
+	sfc.blit(walltxt, (0, 0))
+
+	# Generate obstacle
 
 	for side in (lhs, rhs):
 		last_y = -1
@@ -89,7 +98,7 @@ def sculpt_wall(screen, rect):
 
 		for i in xrange(side.width):
 			x = startx+(i*i_mult)
-			y = side.top + i*drop
+			y = side.top + i*drop_per_x
 
 			prog = ((1.0 - float(i) / side.width) * 100 + 1)
 			prog_log = math.log(prog, 100)
@@ -101,7 +110,9 @@ def sculpt_wall(screen, rect):
 				y = last_y
 			last_y = y
 
-			screen.fill(BLACK, Rect(x, side.top, 1, y-side.top))
+			sfc.fill(TRANSPARENT, Rect(x, side.top, 1, y-side.top))
+
+	return sfc
 
 def split_rect_vert(rect):
 	lhs = Rect(rect.left, rect.top, rect.centerx-rect.left, rect.height)
