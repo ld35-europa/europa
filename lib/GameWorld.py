@@ -9,8 +9,8 @@ from lib.Wall import Wall
 
 class GameWorld:
 	GAME_WIDTH = 640
-	GAME_HEIGTH = 460
-	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGTH]
+	GAME_HEIGHT = 480
+	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
 
 	BACKGROUND_COLOR = Colors.BLACK;
 
@@ -20,16 +20,22 @@ class GameWorld:
 		self.player = Character(Character.CHARACTER_FISH, self.screen);
 
 	def start(self):
+		self.generateWalls();
+
 		while 1:
 			for e in pygame.event.get():
 				if (e.type == pygame.QUIT):
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
 					if (e.key == 32):
-						self.player.startJump();
+						self.player.startJump()
+					if (e.key == 27):
+						sys.exit(0)
 
-			self.screen.fill(self.BACKGROUND_COLOR)
 			self.player.move();
-			Wall(200, 300, 150, self.GAME_HEIGTH-300).drawOnScreen(self.screen);
 			pygame.display.flip()
 			time.sleep(1.0 / 30)
+
+	def generateWalls(self):
+		wall = Wall(200, 300)
+		self.screen.blit(wall.get(), (150, self.GAME_HEIGHT-300))
