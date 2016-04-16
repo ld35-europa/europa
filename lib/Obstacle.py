@@ -8,33 +8,25 @@ from pygame import Surface
 from lib.Colors import Colors
 from random import random
 
-# Sculpt a wall within the passed rect by subtracting from
-# each pixel column, in the left hand side and right hand side
-# of the rect separately. Y_VARIABILITY is the maximum variability from
-# a straight diagonal line (to either side), Y_BIAS_MULT determines
-# how flat-topped the obstacles are.
+# Class reprenting an obstacle between the fluid pools
 
-class Wall:
+class Obstacle:
 
 	Y_VARIABILITY = 10
 	Y_BIAS_MULT = 1.8
 
-	def __init__(self, width, height):
-		self.width = width
-		self.height = height
-		self.walltxt = pygame.image.load("assets/img/wall2.png")
+	def __init__(self):
+		self.obstacletxt = pygame.image.load("assets/img/obstacle4.png")
 
-	def get(self):
+	def get_surface(self, w, h):
 
-		# Sculpt a wall into a surface (width w, height w), initially
+		# Sculpt a obstacle into a surface (width w, height w), initially
 		# a solid block, by subtracting from each pixel column, in the
 		# left hand side and right hand side of the rect separately.
 		# YVAR is the maximum variability from a straight diagonal
 		# line (to either side), Y_BIAS_MULT determines how flat-
 		# topped the obstacles are. Returns the surface.
 
-		w = self.width
-		h = self.height
 		sfc = Surface((w, h))
 		lhs, rhs = self.splitRectVertically(Rect(0, 0, w, h))
 		drop_per_x = float(rhs.height) / rhs.width
@@ -42,7 +34,8 @@ class Wall:
 		YVAR = 10
 		Y_BIAS_MULT = 2.0
 
-		sfc.blit(self.walltxt, (0, 0))
+		sfc.blit(self.obstacletxt, (0, 0))
+		sfc.set_colorkey(Colors.GREEN)
 
 		# Generate obstacle
 
@@ -69,7 +62,7 @@ class Wall:
 					y = last_y
 				last_y = y
 
-				sfc.fill(Colors.TRANSPARENT, Rect(x, side.top, 1, y-side.top))
+				sfc.fill(Colors.GREEN, Rect(x, side.top, 1, y-side.top))
 
 		return sfc
 

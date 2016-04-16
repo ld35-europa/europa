@@ -3,14 +3,21 @@
 import pygame
 import sys
 import time
+from random import random
+
 from lib.Character import Character
 from lib.Colors import Colors
-from lib.Wall import Wall
+from lib.Obstacle import Obstacle
 
 class GameWorld:
-	GAME_WIDTH = 640
-	GAME_HEIGHT = 480
+	GAME_WIDTH = 1280
+	GAME_HEIGHT = 800
 	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
+
+	OBSTACLE_MIN_HEIGHT = 125
+	OBSTACLE_MAX_HEIGHT = 425
+	OBSTACLE_MIN_WIDTH = 100
+	OBSTACLE_MAX_WIDTH = 400
 
 	BACKGROUND_COLOR = Colors.BLACK;
 
@@ -22,7 +29,7 @@ class GameWorld:
 		self.player = Character(Character.CHARACTER_TYPE_FIRE, self.screen);
 
 	def start(self):
-		self.generateWalls();
+		self.generateObstacles();
 
 		while 1:
 			for e in pygame.event.get():
@@ -38,6 +45,16 @@ class GameWorld:
 			pygame.display.flip()
 			time.sleep(1.0 / 30)
 
-	def generateWalls(self):
-		wall = Wall(200, 300)
-		self.screen.blit(wall.get(), (150, self.GAME_HEIGHT-300))
+	def generateObstacles(self):
+		x = 0
+		obstacle = Obstacle()
+
+		while (x < self.GAME_WIDTH):
+			xdelta = int(random() * 400)
+			xdelta = min(150, xdelta)
+			x += xdelta
+			w = max(self.OBSTACLE_MIN_WIDTH, int(random() * self.OBSTACLE_MAX_WIDTH))
+			h = max(self.OBSTACLE_MIN_HEIGHT, int(random() * self.OBSTACLE_MAX_HEIGHT))
+
+			self.screen.blit(obstacle.get_surface(w, h), (x, self.GAME_HEIGHT-h))
+			x += w
