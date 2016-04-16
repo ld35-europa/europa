@@ -5,6 +5,7 @@ import pygame
 import time
 
 JUMPLEN = 200
+JUMPH_MULT=2.5
 
 def main():
 	pygame.init()
@@ -49,12 +50,13 @@ def jump(rect, startx, starty):
 	# arguments. Returns true if jump sequence has ended, false
 	# otherwise.
 	
-	jumph = JUMPLEN/2.0
+	halfjl=JUMPLEN/2.0
+	jumph = JUMPLEN/2.0*JUMPH_MULT
 	
 	x = rect.left
 	y = rect.bottom
-	xdelta = x-startx+5
-	xpara = (xdelta - jumph) / jumph
+	xdelta = x-startx+8
+	xpara = (xdelta - halfjl) / halfjl
 	ypara = xpara**2
 	ydelta = jumph-(ypara*jumph)
 	
