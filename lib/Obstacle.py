@@ -8,13 +8,13 @@ from pygame import Surface
 from lib.Colors import Colors
 from random import random
 
-# Sculpt a wall within the passed rect by subtracting from
+# Sculpt a obstacle within the passed rect by subtracting from
 # each pixel column, in the left hand side and right hand side
 # of the rect separately. Y_VARIABILITY is the maximum variability from
 # a straight diagonal line (to either side), Y_BIAS_MULT determines
 # how flat-topped the obstacles are.
 
-class Wall:
+class Obstacle:
 
 	Y_VARIABILITY = 10
 	Y_BIAS_MULT = 1.8
@@ -22,11 +22,11 @@ class Wall:
 	def __init__(self, width, height):
 		self.width = width
 		self.height = height
-		self.walltxt = pygame.image.load("assets/img/wall2.png")
+		self.obstacletxt = pygame.image.load("assets/img/obstacle2.png")
 
 	def get(self):
 
-		# Sculpt a wall into a surface (width w, height w), initially
+		# Sculpt a obstacle into a surface (width w, height w), initially
 		# a solid block, by subtracting from each pixel column, in the
 		# left hand side and right hand side of the rect separately.
 		# YVAR is the maximum variability from a straight diagonal
@@ -42,7 +42,7 @@ class Wall:
 		YVAR = 10
 		Y_BIAS_MULT = 2.0
 
-		sfc.blit(self.walltxt, (0, 0))
+		sfc.blit(self.obstacletxt, (0, 0))
 
 		# Generate obstacle
 

@@ -5,7 +5,7 @@ import sys
 import time
 from lib.Character import Character
 from lib.Colors import Colors
-from lib.Wall import Wall
+from lib.Obstacle import Obstacle
 
 class GameWorld:
 	GAME_WIDTH = 640
@@ -20,7 +20,7 @@ class GameWorld:
 		self.player = Character(Character.CHARACTER_FISH, self.screen);
 
 	def start(self):
-		self.generateWalls();
+		self.generateObstacles();
 
 		while 1:
 			for e in pygame.event.get():
@@ -36,6 +36,6 @@ class GameWorld:
 			pygame.display.flip()
 			time.sleep(1.0 / 30)
 
-	def generateWalls(self):
-		wall = Wall(200, 300)
-		self.screen.blit(wall.get(), (150, self.GAME_HEIGHT-300))
+	def generateObstacles(self):
+		obstacle = Obstacle(200, 300)
+		self.screen.blit(obstacle.get(), (150, self.GAME_HEIGHT-300))
