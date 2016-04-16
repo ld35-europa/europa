@@ -33,9 +33,9 @@ def main():
 
 	charrect.bottom=h
 
-	wall = sculpt_obstacle(150, 300)
+	wall = sculptObstacle(150, 300)
 	screen.blit(wall, (450, h-300))
-	wall = sculpt_obstacle(225, 200)
+	wall = sculptObstacle(225, 200)
 	screen.blit(wall, (150, h-200))
 
 	while 1:
@@ -66,7 +66,7 @@ def main():
 		pygame.display.flip()
 		time.sleep(1.0/30)
 
-def sculpt_obstacle(w, h):
+def sculptObstacle(w, h):
 
 	# Sculpt a wall into a surface (width w, height w), initially
 	# a solid block, by subtracting from each pixel column, in the
@@ -76,7 +76,7 @@ def sculpt_obstacle(w, h):
 	# topped the obstacles are. Returns the surface.
 
 	sfc = Surface((w, h))
-	lhs, rhs = split_rect_vert(Rect(0, 0, w, h))
+	lhs, rhs = splitRectVertically(Rect(0, 0, w, h))
 	drop_per_x = float(rhs.height) / rhs.width
 	walltxt = pygame.image.load("assets/img/wall2.png")
 
@@ -114,7 +114,7 @@ def sculpt_obstacle(w, h):
 
 	return sfc
 
-def split_rect_vert(rect):
+def splitRectVertically(rect):
 	lhs = Rect(rect.left, rect.top, rect.centerx-rect.left, rect.height)
 	rhs = Rect(rect.centerx, rect.top, rect.right-rect.centerx, rect.height)
 	return (lhs, rhs)
