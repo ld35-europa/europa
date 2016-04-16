@@ -17,7 +17,7 @@ class GameWorld:
 	def __init__(self):
 		pygame.init()
 		pygame.display.set_caption('Europa')
-
+		
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.player = Character(Character.CHARACTER_TYPE_FIRE, self.screen);
 
