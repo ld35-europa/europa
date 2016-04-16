@@ -2,17 +2,19 @@
 
 import pygame
 import lib.GameWorld
+import pygame.sprite
 
 from lib.Colors import Colors
 from pygame import Rect
 
-class Character:
+class Character(pygame.sprite.Sprite):
 
 	jump_start_position_x = 0;
 	jump_start_position_y = 0;
 
 	CHARACTER_IMAGES = ["assets/img/char.png"];
-	CHARACTER_FISH = CHARACTER_IMAGES[0];
+	CHARACTER_TYPE_FIRE = 0;
+	CHARACTER_TYPE_WATER = 1;
 
 	JUMP_LENGTH = 200
 	JUMP_HEIGHT_MULT = 2.5
@@ -20,12 +22,39 @@ class Character:
 	MODE_JUMP = 1;
 	MODE_IDLE = 0;
 
+	DEATH_ANIMATION_LENGTH = 7;
+
 	mode = MODE_IDLE;
+	type = CHARACTER_TYPE_FIRE;
 
 	def __init__(self, character_type, screen):
 		self.GameWorld = lib.GameWorld.GameWorld
 		self.screen = screen
-		self.image = pygame.image.load(character_type)
+		self.setCharaterType(character_type);
+		sprites = self.getDeathSprites(character_type)
+		#sprites.draw(screen)
+
+
+	def getDeathSprites(self, character_type):
+		sprite_list = pygame.sprite.Group()
+		sprite_death_folders = {
+			self.CHARACTER_TYPE_FIRE : "assets/img/fire/death/",
+			self.CHARACTER_TYPE_WATER : "assets/img/water/death/"
+		}
+		sprite_dir = sprite_death_folders.get(character_type, False);
+
+		if (sprite_dir):
+			for x in range(0, self.DEATH_ANIMATION_LENGTH):
+				print sprite_dir + str(x) + '.png'
+				pygame.image.load(sprite_dir + str(x) + '.png')
+				sprite_list.add()
+				#sprite_list.add();
+
+		return sprite_list
+
+
+	def setCharaterType(self, character_type):
+		self.image = pygame.image.load(self.CHARACTER_IMAGES[character_type]);
 		self.rect = self.image.get_rect()
 		self.last_rect = Rect(0, 0, 0, 0)
 		self.rect.bottom = self.GameWorld.GAME_HEIGHT
