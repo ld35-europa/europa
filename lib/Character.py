@@ -21,9 +21,10 @@ class Character(pygame.sprite.Sprite):
 	JUMP_LENGTH = 200
 	JUMP_HEIGHT_MULT = 2.5
 
-	MODE_JUMP = 1;
-	MODE_IDLE = 0;
-	MODE_DIE = 2;
+	MODE_JUMP = 0
+	MODE_DOUBLE_JUMP = 1
+	MODE_IDLE = 2;
+	MODE_DIE = 3;
 
 	TOTAL_FRAMES = 7;
 
@@ -68,9 +69,9 @@ class Character(pygame.sprite.Sprite):
 			self.rect = self.image.get_rect()
 
 	def startJump(self):
-		self.jump_start_position_x = self.rect.left
-		self.jump_start_position_y = self.rect.bottom
-		self.mode = self.MODE_JUMP;
+			self.jump_start_position_x = self.rect.left
+			self.jump_start_position_y = self.rect.bottom
+			self.mode = self.MODE_JUMP;
 
 	def jump(self):
 		half_jump_length = self.JUMP_LENGTH / 2.0
