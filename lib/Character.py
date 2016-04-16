@@ -3,6 +3,7 @@
 import pygame
 import lib.GameWorld
 import pygame.sprite
+import time
 
 from lib.Colors import Colors
 from pygame import Rect
@@ -12,52 +13,59 @@ class Character(pygame.sprite.Sprite):
 	jump_start_position_x = 0;
 	jump_start_position_y = 0;
 
-	CHARACTER_IMAGES = ["assets/img/char.png"];
-	CHARACTER_TYPE_FIRE = 0;
-	CHARACTER_TYPE_WATER = 1;
+	CHARACTER_TYPE_FIRE = 'fire';
+	CHARACTER_TYPE_WATER = 'water';
+	CHARACTER_STATE_ALIVE = 'alive';
+	CHARACTER_STATE_DEAD = 'dead';
 
 	JUMP_LENGTH = 200
 	JUMP_HEIGHT_MULT = 2.5
 
 	MODE_JUMP = 1;
 	MODE_IDLE = 0;
+	MODE_DIE = 2;
 
-	DEATH_ANIMATION_LENGTH = 7;
+	TOTAL_FRAMES = 7;
 
 	mode = MODE_IDLE;
-	type = CHARACTER_TYPE_FIRE;
+	type = CHARACTER_TYPE_FIRE
+	state = CHARACTER_STATE_ALIVE
+	frame = 0
 
-	def __init__(self, character_type, screen):
+	def __init__(self, character_type = CHARACTER_TYPE_FIRE, character_state = CHARACTER_STATE_ALIVE, frame_num = 0):
+		super(Character, self).__init__();
+		self.type = character_type
+		self.state = character_state
+		self.frame = frame_num
 		self.GameWorld = lib.GameWorld.GameWorld
-		self.screen = screen
-		self.setCharaterType(character_type);
-		sprites = self.getDeathSprites(character_type)
-		#sprites.draw(screen)
-
-
-	def getDeathSprites(self, character_type):
-		sprite_list = pygame.sprite.Group()
-		sprite_death_folders = {
-			self.CHARACTER_TYPE_FIRE : "assets/img/fire/death/",
-			self.CHARACTER_TYPE_WATER : "assets/img/water/death/"
-		}
-		sprite_dir = sprite_death_folders.get(character_type, False);
-
-		if (sprite_dir):
-			for x in range(0, self.DEATH_ANIMATION_LENGTH):
-				print sprite_dir + str(x) + '.png'
-				pygame.image.load(sprite_dir + str(x) + '.png')
-				sprite_list.add()
-				#sprite_list.add();
-
-		return sprite_list
-
-
-	def setCharaterType(self, character_type):
-		self.image = pygame.image.load(self.CHARACTER_IMAGES[character_type]);
-		self.rect = self.image.get_rect()
 		self.last_rect = Rect(0, 0, 0, 0)
+		self.createCharater();
 		self.rect.bottom = self.GameWorld.GAME_HEIGHT
+
+
+	def startDie(self):
+		self.mode = self.MODE_DIE
+		self.frame = 0
+		self.state = self.CHARACTER_STATE_DEAD
+
+
+	def die(self):
+		time.sleep(1.0 / 10)
+		if (self.frame + 1 <= self.TOTAL_FRAMES):
+			self.frame += 1;
+			self.createCharater();
+
+
+	def createCharater(self):
+		image_path = "assets/img/" + self.type + "/" + self.state + "/" + str(self.frame) + ".png";
+		self.image = pygame.image.load(image_path);
+		if (hasattr(self, 'rect')):
+			rect = self.image.get_rect()
+			rect.left = self.rect.left
+			rect.bottom = self.rect.bottom
+			self.rect = rect
+		else:
+			self.rect = self.image.get_rect()
 
 	def startJump(self):
 		self.jump_start_position_x = self.rect.left
@@ -84,12 +92,16 @@ class Character(pygame.sprite.Sprite):
 			return False
 		return True
 
-	def move(self):
+	def drawOnSurface(self, surface):
 		if (self.mode == self.MODE_JUMP):
 			if (self.jump() == False):
 				self.mode = self.MODE_IDLE;
 
-		self.screen.fill(Colors.BLACK, self.last_rect)
-		self.screen.blit(self.image, self.rect)
+		if (self.mode == self.MODE_DIE):
+			if (self.die() == False):
+				self.mode = self.MODE_IDLE;
+
+		surface.fill(Colors.BLACK, self.last_rect)
+		surface.blit(self.image, self.rect)
 		self.last_rect = Rect(self.rect)
 

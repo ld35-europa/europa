@@ -26,7 +26,7 @@ class GameWorld:
 		pygame.display.set_caption('Europa')
 		
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
-		self.player = Character(Character.CHARACTER_TYPE_FIRE, self.screen);
+		self.player = Character();
 
 	def start(self):
 		self.generateObstacles();
@@ -36,12 +36,14 @@ class GameWorld:
 				if (e.type == pygame.QUIT):
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
-					if (e.key == 32):
+					if (e.key == 32 and self.player.state == self.player.CHARACTER_STATE_ALIVE):
 						self.player.startJump()
 					if (e.key == 27):
 						sys.exit(0)
+					if (e.key == pygame.K_1):
+						self.player.startDie();
 
-			self.player.move();
+			self.player.drawOnSurface(self.screen);
 			pygame.display.flip()
 			time.sleep(1.0 / 30)
 
