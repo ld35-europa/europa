@@ -4,4 +4,3 @@ from lib.GameWorld import GameWorld
 
 game = GameWorld();
 game.start();
-
