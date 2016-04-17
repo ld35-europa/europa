@@ -14,10 +14,10 @@ class GameWorld:
 	GAME_HEIGHT = 800
 	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
 
-	OBSTACLE_MIN_HEIGHT = 125
-	OBSTACLE_MAX_HEIGHT = 425
-	OBSTACLE_MIN_WIDTH = 100
-	OBSTACLE_MAX_WIDTH = 400
+	OBSTACLE_MIN_HEIGHT = 50
+	OBSTACLE_MAX_HEIGHT = 125
+	OBSTACLE_MIN_WIDTH = 50
+	OBSTACLE_MAX_WIDTH = 200
 
 	STATE_PLAYING = 0
 	STATE_PAUSED = 1
@@ -34,11 +34,13 @@ class GameWorld:
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.player = Character();
 
+
 	def update(self):
-		return False
+		self.player.update();
+		if (self.player.checkCollision(self.obstacles) == True):
+			self.player.startDie();
 
 	def draw(self):
-		self.player.update();
 		self.player.draw(self.screen);
 
 	def start(self):
@@ -58,15 +60,18 @@ class GameWorld:
 					if (e.key == pygame.K_1):
 						self.player.startDie();
 
+			self.update();
 			self.draw();
 
 			pygame.display.flip()
 			time.sleep(1.0 / 30)
 
 	def generateObstacles(self):
-		x = 0
-		obstacle = Obstacle()
+		self.obstacles = pygame.sprite.Group();
+		w = max(self.OBSTACLE_MIN_WIDTH, int(random() * self.OBSTACLE_MAX_WIDTH))
+		h = max(self.OBSTACLE_MIN_HEIGHT, int(random() * self.OBSTACLE_MAX_HEIGHT))
 
+		x = 200
 		while (x < self.GAME_WIDTH):
 			xdelta = int(random() * 400)
 			xdelta = min(150, xdelta)
@@ -74,5 +79,6 @@ class GameWorld:
 			w = max(self.OBSTACLE_MIN_WIDTH, int(random() * self.OBSTACLE_MAX_WIDTH))
 			h = max(self.OBSTACLE_MIN_HEIGHT, int(random() * self.OBSTACLE_MAX_HEIGHT))
 
-			self.screen.blit(obstacle.get_surface(w, h), (x, self.GAME_HEIGHT-h))
-			x += w
+			obstacle = Obstacle(w, h);
+			obstacle.draw(self.screen, x);
+			self.obstacles.add(obstacle)

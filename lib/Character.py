@@ -107,3 +107,8 @@ class Character(pygame.sprite.Sprite):
 		surface.blit(self.image, self.rect)
 		self.last_rect = Rect(self.rect)
 
+	def checkCollision(self, sprite_group):
+		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1):
+			return True
+
+

@@ -7,18 +7,22 @@ from pygame import Rect
 from pygame import Surface
 from lib.Colors import Colors
 from random import random
+import pygame.sprite
+import lib.GameWorld
 
 # Class reprenting an obstacle between the fluid pools
 
-class Obstacle:
+class Obstacle(pygame.sprite.Sprite):
 
 	Y_VARIABILITY = 10
 	Y_BIAS_MULT = 1.8
 
-	def __init__(self):
+	def __init__(self, width, height):
+		super(Obstacle, self).__init__();
 		self.obstacletxt = pygame.image.load("assets/img/obstacle4.png")
+		self.create(width, height),
 
-	def get_surface(self, w, h):
+	def create(self, width, height):
 
 		# Sculpt a obstacle into a surface (width w, height w), initially
 		# a solid block, by subtracting from each pixel column, in the
@@ -27,8 +31,11 @@ class Obstacle:
 		# line (to either side), Y_BIAS_MULT determines how flat-
 		# topped the obstacles are. Returns the surface.
 
-		sfc = Surface((w, h))
-		lhs, rhs = self.splitRectVertically(Rect(0, 0, w, h))
+		sfc = Surface((width, height))
+		self.rect = sfc.get_rect();
+		self.rect.bottom = lib.GameWorld.GameWorld.GAME_HEIGHT
+
+		lhs, rhs = self.splitRectVertically(Rect(0, 0, width, height))
 		drop_per_x = float(rhs.height) / rhs.width
 
 		YVAR = 10
@@ -64,9 +71,13 @@ class Obstacle:
 
 				sfc.fill(Colors.GREEN, Rect(x, side.top, 1, y-side.top))
 
-		return sfc
+		self.image = sfc;
 
 	def splitRectVertically(self, rect):
 		lhs = Rect(rect.left, rect.top, rect.centerx-rect.left, rect.height)
 		rhs = Rect(rect.centerx, rect.top, rect.right-rect.centerx, rect.height)
 		return (lhs, rhs)
+
+	def draw(self, surface, x):
+		self.rect.left = x
+		surface.blit(self.image, self.rect)
