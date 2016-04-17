@@ -44,7 +44,6 @@ class Character(pygame.sprite.Sprite):
 		self.state = character_state
 		self.frame = frame_num
 		self.GameWorld = lib.GameWorld.GameWorld
-		self.last_rect = Rect(0, 0, 0, 0)
 		self.createCharater();
 		self.rect.bottom = self.GameWorld.GAME_HEIGHT
 		self.last_time = pygame.time.get_ticks();
@@ -178,7 +177,7 @@ class Character(pygame.sprite.Sprite):
 				self.vx = 0;
 
 			## physics update
-			self.px = self.px + self.vx + 1 # * dt
+			self.px = self.px + self.vx # * dt
 			self.py = self.py + self.vy # * dt
 
 			self.rect.left = self.px - self.rect.width / 2
@@ -199,16 +198,10 @@ class Character(pygame.sprite.Sprite):
 				elif (self.animation == self.ANIMATION_TRANSFORM_TO_FIRE or self.animation == self.ANIMATION_TRANSFORM_TO_WATER):
 					self.animationTransform();
 
-
 	def draw(self, surface):
-		surface.fill(Colors.BLACK, self.last_rect)
-		image_rect = self.image.get_rect();
-		image_rect.x = self.rect.x;
-		image_rect.y = self.rect.y;
-		surface.blit(self.image, image_rect)
-		self.last_rect = Rect(image_rect)
+		surface.blit(self.image, self.rect)
 
-	def checkCollision(self, sprite_group,):
+	def checkCollision(self, sprite_group):
 		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1):
 			return sprite
 		return False;

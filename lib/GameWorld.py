@@ -22,16 +22,16 @@ class GameWorld:
 	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
 	GAME_VELOCITY_X = 1;
 
-	BUF_WIDTH = GAME_WIDTH*2
-	BUF_HEIGHT = GAME_HEIGHT
+	SCENE_BUF_WIDTH = GAME_WIDTH*2
+	SCENE_BUF_HEIGHT = GAME_HEIGHT
 	GAME_FPS = 120;
 	ANIMATION_FPS = GAME_FPS / 3;
 
 	FLUID_MIN_W = 400
 	FLUID_MAX_W = 1000
 
-	OBSTACLE_MIN_HEIGHT = 125
-	OBSTACLE_MAX_HEIGHT = 125
+	OBSTACLE_MIN_HEIGHT = 200
+	OBSTACLE_MAX_HEIGHT = 325
 	OBSTACLE_MIN_WIDTH = 150
 	OBSTACLE_MAX_WIDTH = 425
 
@@ -49,20 +49,31 @@ class GameWorld:
 		pygame.display.set_caption('Europa')
 
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
-		self.screenbuf = Surface((self.BUF_WIDTH, self.BUF_HEIGHT))
+		self.scenebuf = Surface((self.SCENE_BUF_WIDTH, self.SCENE_BUF_HEIGHT))
+		self.backbuf = Surface((self.GAME_WIDTH, self.GAME_HEIGHT))
+
 		self.velocity = self.GAME_VELOCITY_X
-		self.screenbuf_delta_x = 0
+		self.scenebuf_delta_x = 0
 
 		self.player = Character()
-		self.music_player = MusicPlayer(self.player)
 		self.obstacles = None
 		self.fluids = None
+		self.first_fluid = None
 		self.last_fluid = None
 
+		self.music_player = MusicPlayer(self.player)
 		self.clock  = pygame.time.Clock();
+
+		# Initial backgrounds
+
+		bg_dest_rect = self.screen.get_rect()
+		self.fillBackground(self.scenebuf, bg_dest_rect)
+		bg_dest_rect.left += self.GAME_WIDTH
+		self.fillBackground(self.scenebuf, bg_dest_rect)
 
 	def start(self):
 		self.generateScene();
+		self.setPlayerInitialPhase()
 		self.state = self.STATE_PLAYING;
 
 		while self.state != self.STATE_FINISHED:
@@ -103,21 +114,21 @@ class GameWorld:
 
 	def update(self):
 		if (self.player.state == self.player.CHARACTER_STATE_ALIVE):
-			self.screenbuf_delta_x -= self.velocity
-			if (self.screenbuf_delta_x < -self.GAME_WIDTH):
+			self.scenebuf_delta_x -= self.velocity
+			if (self.scenebuf_delta_x < -self.GAME_WIDTH):
 
-				# Screenbuf depleted. Copy second half of screenbuf to first,
+				# Screenbuf depleted. Copy second half of scenebuf to first,
 				# generate new second half, set buf -> screen blit delta to 0
 
-				sbuf = self.screenbuf
+				sbuf = self.scenebuf
 
-				sbuf.fill(Colors.BLACK, Rect(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
+				self.fillBackground(sbuf, Rect(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
 				sbuf.blit(sbuf, (0, 0), Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT));
 
-				sbuf.fill(Colors.BLACK, Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
+				self.fillBackground(sbuf, Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
 				self.generateScene(self.GAME_WIDTH)
 
-				self.screenbuf_delta_x = 0
+				self.scenebuf_delta_x = 0
 
 		self.player.update();
 		if (self.player.checkCollision(self.obstacles) != False):
@@ -132,11 +143,35 @@ class GameWorld:
 					self.player.startAnimationDeath();
 
 	def draw(self):
-		self.player.draw(self.screenbuf);
-		self.screen.blit(self.screenbuf, (self.screenbuf_delta_x, 0));
+
+		# scenebuf -> backbuf -> screen
+
+		self.backbuf.blit(self.scenebuf, (self.scenebuf_delta_x, 0));
+		self.player.draw(self.backbuf);
+		self.screen.blit(self.backbuf, (0, 0))
 
 	def getVelocity(self):
 		return self.velocity
+
+	def fillBackground(self, dst_surface, dst_rect):
+
+		# dst_rect represents both the destination on dst_surface and
+		# the size of the background image portion. The background is
+		# expected to be mirrored on the y-axis: the horizontal center
+		# portion is blitted to surface.
+
+		bg = load_cached_asset("assets/img/background.png")
+		bgrect = bg.get_rect()
+		bgsrcx = int((bgrect.width / 2.0) - (dst_rect.width / 2.0))
+
+		dst_surface.blit(bg, dst_rect, Rect(bgsrcx, 0, dst_rect.width, dst_rect.height))
+
+	def setPlayerInitialPhase(self):
+		ftype = self.first_fluid.getType()
+		self.player.type = \
+			Character.CHARACTER_TYPE_FIRE \
+			if ftype == Fluid.FLUID_TYPE_LAVA \
+			else Character.CHARACTER_TYPE_WATER
 
 	def generateScene(self, startx=0):
 
@@ -144,7 +179,7 @@ class GameWorld:
 		# position startx
 
 		x = startx
-		maxx = self.BUF_WIDTH
+		maxx = self.SCENE_BUF_WIDTH
 		fluid_rects = []
 
 		# Generate fluid rects
@@ -152,7 +187,7 @@ class GameWorld:
 		while (x < maxx):
 			w = random.randrange(self.FLUID_MIN_W, self.FLUID_MAX_W+1)
 			h = load_cached_asset("assets/img/fluid/lava.png").get_rect().height
-			print h;
+
 			# If the next rect were smaller than FLUID_MIN_W, stretch
 			# current to scene end. If the current rect is past scene end,
 			# chop off excess.
@@ -160,7 +195,7 @@ class GameWorld:
 			if ((maxx - (x + w) < self.FLUID_MIN_W) or (x + w > maxx)):
 				w = maxx - x
 
-			r = Rect(x, self.GAME_HEIGHT-h+50, w, h)
+			r = Rect(x, self.GAME_HEIGHT-h, w, h)
 			fluid_rects.append(r)
 			x += w
 
@@ -190,9 +225,11 @@ class GameWorld:
 				else:
 					f = Fluid(Fluid.FLUID_TYPE_WATER, r)
 
+			if (not self.first_fluid):
+				self.first_fluid = f
 			self.last_fluid = f
 			self.fluids.add(f)
-			f.draw(self.screenbuf, r)
+			f.draw(self.scenebuf, r)
 
 	def generateObstacles(self, rects):
 
@@ -210,5 +247,5 @@ class GameWorld:
 			x = int(xcenter - (w/2.0))
 
 			obstacle = Obstacle(w, h)
-			obstacle.draw(self.screenbuf, x)
+			obstacle.draw(self.scenebuf, x)
 			self.obstacles.add(obstacle)
