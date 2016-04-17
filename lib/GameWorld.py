@@ -88,7 +88,7 @@ class GameWorld:
 						if (e.key == pygame.K_3):
 							self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_WATER)
 						if e.key == pygame.K_SPACE:
-							self.player.jumping = True
+							self.player.startJump()
 						if (e.key == pygame.K_LEFT):
 							self.player.inputx -= 1
 						if (e.key == pygame.K_RIGHT):
@@ -129,8 +129,16 @@ class GameWorld:
 				self.scenebuf_delta_x = 0
 
 		self.player.update();
-		if (self.player.checkCollision(self.obstacles) == True):
+		if (self.player.checkCollision(self.obstacles) != False):
 			self.player.startAnimationDeath();
+
+		if (self.fluids != None):
+			fluidCollisionSprite = self.player.checkCollision(self.fluids);
+			if (fluidCollisionSprite != False):
+				if (fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_LAVA and self.player.type == self.player.CHARACTER_TYPE_WATER):
+					self.player.startAnimationDeath();
+				elif (fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_WATER and self.player.type == self.player.CHARACTER_TYPE_FIRE):
+					self.player.startAnimationDeath();
 
 	def draw(self):
 
@@ -192,7 +200,7 @@ class GameWorld:
 		# Generate fluid pools (Fluid class) according to the
 		# passed Rect list
 
-		self.fluids = []
+		self.fluids = pygame.sprite.Group();
 
 		for r in (rects):
 			f = None
@@ -209,7 +217,7 @@ class GameWorld:
 					f = Fluid(Fluid.FLUID_TYPE_WATER, r)
 
 			self.last_fluid = f
-			self.fluids.append(f)
+			self.fluids.add(f)
 			f.draw(self.scenebuf, r)
 
 	def generateObstacles(self, rects):

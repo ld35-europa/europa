@@ -57,21 +57,27 @@ class Character(pygame.sprite.Sprite):
 		self.jumping = False
 		self.jumpcapacity = 1
 
+		self.jump_sound = pygame.mixer.Sound("assets/sounds/jump.ogg")
+		self.shapeshift_sound = pygame.mixer.Sound("assets/sounds/shapeshift.ogg")
+		self.death_sound = pygame.mixer.Sound("assets/sounds/sizzle.ogg")
 
 	def startAnimationSwim(self):
 		self.animation = self.ANIMATION_SWIM
 		self.frame = 0
 
 	def startAnimationDeath(self):
+		pygame.mixer.find_channel().play(self.death_sound)
 		self.animation = self.ANIMATION_DEATH
 		self.frame = 0
 		self.state = self.CHARACTER_STATE_DEAD
 
 	def startAnimationTransform(self, animation):
 		if (animation == self.ANIMATION_TRANSFORM_TO_FIRE and self.type == self.CHARACTER_TYPE_WATER):
+			pygame.mixer.find_channel().play(self.shapeshift_sound)
 			self.frame = self.FRAMES_TRANSFORM
 			self.animation = self.ANIMATION_TRANSFORM_TO_FIRE
 		elif (animation == self.ANIMATION_TRANSFORM_TO_WATER and self.type == self.CHARACTER_TYPE_FIRE):
+			pygame.mixer.find_channel().play(self.shapeshift_sound)
 			self.frame = 0
 			self.animation = self.ANIMATION_TRANSFORM_TO_WATER
 
@@ -177,5 +183,9 @@ class Character(pygame.sprite.Sprite):
 
 	def checkCollision(self, sprite_group):
 		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1):
-			return True
+			return sprite
 		return False;
+
+	def startJump(self):
+		self.jumping = True
+		pygame.mixer.find_channel().play(self.jump_sound)

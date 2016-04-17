@@ -39,6 +39,9 @@ class Fluid(pygame.sprite.Sprite):
 			surface.blit(self.image, (dstx, dstrect.top), blitarea)
 			blit_delta_x += srcrect.width
 
+	def update(self):
+		return True;
+
 	def getType(self):
 		return self.ftype
 
