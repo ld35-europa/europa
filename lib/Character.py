@@ -10,20 +10,11 @@ from pygame import Rect
 
 class Character(pygame.sprite.Sprite):
 
-	jump_start_position_x = 0;
-	jump_start_position_y = 0;
-
 	CHARACTER_TYPE_FIRE = 'fire';
 	CHARACTER_TYPE_WATER = 'water';
 
 	CHARACTER_STATE_ALIVE = 'alive';
 	CHARACTER_STATE_DEAD = 'dead';
-
-	ACTION_JUMP = 0
-	ACTION_IDLE = 2;
-
-	JUMP_LENGTH = 600
-	JUMP_HEIGHT_MULT = 2.5
 
 	ANIMATION_SWIM = 0;
 	ANIMATION_DEATH = 1;
@@ -35,7 +26,6 @@ class Character(pygame.sprite.Sprite):
 	FRAMES_DEATH = 7;
 	FRAMES_TRANSFORM = 9;
 
-	action = ACTION_IDLE
 	animation = ANIMATION_SWIM
 	type = CHARACTER_TYPE_FIRE
 	state = CHARACTER_STATE_ALIVE
@@ -56,6 +46,16 @@ class Character(pygame.sprite.Sprite):
 		self.rect.bottom = self.GameWorld.GAME_HEIGHT
 		self.last_time = pygame.time.get_ticks();
 
+		self.vx = 0
+		self.vy = 0
+
+		self.px = 100
+		self.py = (2.0/3.0) * self.GameWorld.GAME_HEIGHT
+
+		self.inputx = 0 # -1 = left, 1 = right
+		self.jumping = False
+		self.jumpcapacity = 1
+
 
 	def startAnimationSwim(self):
 		self.animation = self.ANIMATION_SWIM
@@ -65,7 +65,6 @@ class Character(pygame.sprite.Sprite):
 		self.animation = self.ANIMATION_DEATH
 		self.frame = 0
 		self.state = self.CHARACTER_STATE_DEAD
-		self.action = self.ACTION_IDLE;
 
 	def startAnimationTransform(self, animation):
 		if (animation == self.ANIMATION_TRANSFORM_TO_FIRE and self.type == self.CHARACTER_TYPE_WATER):
@@ -121,46 +120,40 @@ class Character(pygame.sprite.Sprite):
 		else:
 			self.rect = self.image.get_rect()
 
-	def stopJump(self):
-		return True;
-
-	def startJump(self):
-		self.jump_start_position_x = self.rect.left
-		self.jump_start_position_y = self.rect.bottom
-		self.action = self.ACTION_JUMP;
-
-	def actionJump(self):
-		half_jump_length = self.JUMP_LENGTH / 2.0
-		jump_height = self.JUMP_LENGTH / 2.0 * self.JUMP_HEIGHT_MULT
-
-		x = self.rect.left
-		y = self.rect.bottom
-
-		xdelta = x - self.jump_start_position_x + 8
-		xpara = (xdelta - half_jump_length) / half_jump_length
-		ypara = xpara ** 2
-		ydelta = jump_height - (ypara * jump_height)
-
-		self.rect.left = self.jump_start_position_x + xdelta
-		self.rect.bottom = self.jump_start_position_y - ydelta
-
-		if (xdelta >= self.JUMP_LENGTH):
-			self.rect.bottom = self.jump_start_position_y
-			return False
-		return True
-
 	def update(self):
 		time_between = pygame.time.get_ticks() - self.last_time;
 
-		if (self.action == self.ACTION_JUMP):
-			if (self.actionJump() == False):
-				self.action = self.ACTION_IDLE;
+		if (self.state == self.CHARACTER_STATE_ALIVE):
+			## jumping logic
+			if self.jumping:
+				self.vy += -4.0 * self.jumpcapacity
+				self.jumpcapacity *= 0.9
 
-		if (self.action == self.ACTION_IDLE and self.state == self.CHARACTER_STATE_ALIVE):
-			self.rect.left += self.GameWorld.GAME_VELOCITY;
+			inwater = self.py > (2.0/3.0) * self.GameWorld.GAME_HEIGHT
+			if inwater:
+				if self.vy > 0:
+					self.vy *= 0.7
+					if not self.jumping:
+						self.jumpcapacity = 1
+			else:
+				self.vy += 1.0
 
+			## left/right logic
+			if self.inputx != 0:
+				movement_velocity = 5
+				self.vx = self.inputx * movement_velocity
+			else:
+				self.vx = 0;
+
+			## physics update
+			self.px = self.px + self.vx + 1 # * dt
+			self.py = self.py + self.vy # * dt
+
+			self.rect.left = self.px - self.rect.width / 2
+			self.rect.top = self.py - self.rect.height / 2
+
+		##animations
 		if (time_between >= self.GameWorld.ANIMATION_FPS and self.animation != self.ANIMATION_NONE):
-
 			self.last_time = pygame.time.get_ticks();
 
 			if (self.animation == self.ANIMATION_DEATH):
@@ -182,5 +175,3 @@ class Character(pygame.sprite.Sprite):
 		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1):
 			return True
 		return False;
-
-
