@@ -67,7 +67,11 @@ class GameWorld:
 					if (e.key == pygame.K_ESCAPE):
 						sys.exit(0)
 					if (e.key == pygame.K_1):
-						self.player.startDie();
+						self.player.startAnimationDeath();
+					if (e.key == pygame.K_2):
+						self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_FIRE)
+					if (e.key == pygame.K_3):
+						self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_WATER)
 
 			self.update();
 			self.draw();
