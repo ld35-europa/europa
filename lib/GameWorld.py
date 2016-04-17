@@ -53,7 +53,7 @@ class GameWorld:
 					self.state = self.STATE_FINISHED
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
-					if (e.key == 32 and self.player.state == self.player.CHARACTER_STATE_ALIVE and self.player.mode != self.player.MODE_JUMP):
+					if (e.key == 32 and self.player.state == self.player.CHARACTER_STATE_ALIVE and self.player.action != self.player.ACTION_JUMP):
 						self.player.startJump()
 					if (e.key == pygame.K_ESCAPE):
 						sys.exit(0)

@@ -21,14 +21,13 @@ class Character(pygame.sprite.Sprite):
 	JUMP_LENGTH = 200
 	JUMP_HEIGHT_MULT = 2.5
 
-	MODE_JUMP = 0
-	MODE_DOUBLE_JUMP = 1
-	MODE_IDLE = 2;
-	MODE_DIE = 3;
+	ACTION_JUMP = 0
+	ACTION_DIE = 1;
+	ACTION_IDLE = 2;
 
 	TOTAL_FRAMES = 7;
 
-	mode = MODE_IDLE;
+	action = ACTION_IDLE
 	type = CHARACTER_TYPE_FIRE
 	state = CHARACTER_STATE_ALIVE
 	frame = 0
@@ -45,7 +44,7 @@ class Character(pygame.sprite.Sprite):
 
 
 	def startDie(self):
-		self.mode = self.MODE_DIE
+		self.action = self.ACTION_DIE
 		self.frame = 0
 		self.state = self.CHARACTER_STATE_DEAD
 
@@ -71,7 +70,15 @@ class Character(pygame.sprite.Sprite):
 	def startJump(self):
 			self.jump_start_position_x = self.rect.left
 			self.jump_start_position_y = self.rect.bottom
-			self.mode = self.MODE_JUMP;
+			self.action = self.ACTION_JUMP;
+
+	def swim(self):
+		if (self.frame + 1 <= self.TOTAL_FRAMES):
+			self.frame += 1;
+		else:
+			self.frame = 0;
+
+		self.createCharater();
 
 	def jump(self):
 		half_jump_length = self.JUMP_LENGTH / 2.0
@@ -94,13 +101,16 @@ class Character(pygame.sprite.Sprite):
 		return True
 
 	def update(self):
-		if (self.mode == self.MODE_JUMP):
+		if (self.action == self.ACTION_JUMP):
 			if (self.jump() == False):
-				self.mode = self.MODE_IDLE;
+				self.action = self.ACTION_IDLE;
 
-		if (self.mode == self.MODE_DIE):
+		if (self.action == self.ACTION_DIE):
 			if (self.die() == False):
-				self.mode = self.MODE_IDLE;
+				self.action = self.ACTION_IDLE;
+
+		if (self.state == self.CHARACTER_STATE_ALIVE):
+			self.swim();
 
 	def draw(self, surface):
 		surface.fill(Colors.BLACK, self.last_rect)
