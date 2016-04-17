@@ -24,6 +24,7 @@ class GameWorld:
 	STATE_PLAYING = 0
 	STATE_PAUSED = 1
 	STATE_FINISHED = 2
+	STATE_MENU = 3
 
 	state = STATE_FINISHED
 
@@ -36,7 +37,6 @@ class GameWorld:
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.player = Character();
 		self.clock  = pygame.time.Clock();
-
 
 	def update(self):
 		self.player.update();
