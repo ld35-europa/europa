@@ -13,6 +13,7 @@ from lib.Character import Character
 from lib.Colors import Colors
 from lib.Obstacle import Obstacle
 from lib.Fluid import Fluid
+from lib.MusicPlayer import MusicPlayer
 
 class GameWorld:
 	GAME_WIDTH = 1280
@@ -52,6 +53,7 @@ class GameWorld:
 		self.screenbuf_delta_x = 0
 
 		self.player = Character();
+		self.music_player = MusicPlayer(self.player)
 		self.obstacles = None
 		self.fluids = None
 		self.last_fluid = None
@@ -94,6 +96,7 @@ class GameWorld:
 
 			self.update();
 			self.draw();
+			self.music_player.update()
 
 			pygame.display.flip()
 
@@ -201,4 +204,3 @@ class GameWorld:
 			obstacle = Obstacle(w, h)
 			obstacle.draw(self.screenbuf, x)
 			self.obstacles.add(obstacle)
-
