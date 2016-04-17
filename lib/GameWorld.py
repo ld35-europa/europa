@@ -18,6 +18,8 @@ class GameWorld:
 	GAME_WIDTH = 1280
 	GAME_HEIGHT = 800
 	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
+	GAME_VELOCITY = 1;
+
 	BUF_WIDTH = GAME_WIDTH*2
 	BUF_HEIGHT = GAME_HEIGHT
 	GAME_FPS = 120;
@@ -46,7 +48,7 @@ class GameWorld:
 
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.screenbuf = Surface((self.BUF_WIDTH, self.BUF_HEIGHT))
-		self.velocity = 5
+		self.velocity = self.GAME_VELOCITY
 		self.screenbuf_delta_x = 0
 
 		self.player = Character();
@@ -68,7 +70,7 @@ class GameWorld:
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
 					if (\
-						e.key == 32 and \
+						e.key == pygame.K_SPACE and \
 						self.player.state == self.player.CHARACTER_STATE_ALIVE and \
 						self.player.action != self.player.ACTION_JUMP \
 					):
@@ -81,6 +83,13 @@ class GameWorld:
 						self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_FIRE)
 					if (e.key == pygame.K_3):
 						self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_WATER)
+				elif (e.type == pygame.KEYUP):
+					if (\
+						e.key == pygame.K_SPACE and \
+						self.player.state == self.player.CHARACTER_STATE_ALIVE and \
+						self.player.action == self.player.ACTION_JUMP \
+					):
+						self.player.stopJump()
 
 			self.update();
 			self.draw();
@@ -88,26 +97,26 @@ class GameWorld:
 			pygame.display.flip()
 
 	def update(self):
-		self.screenbuf_delta_x -= self.velocity
+		if (self.player.state == self.player.CHARACTER_STATE_ALIVE):
+			self.screenbuf_delta_x -= self.velocity
+			if (self.screenbuf_delta_x < -self.GAME_WIDTH):
 
-		if (self.screenbuf_delta_x < -self.GAME_WIDTH):
+				# Screenbuf depleted. Copy second half of screenbuf to first,
+				# generate new second half, set buf -> screen blit delta to 0
 
-			# Screenbuf depleted. Copy second half of screenbuf to first,
-			# generate new second half, set buf -> screen blit delta to 0
+				sbuf = self.screenbuf
 
-			sbuf = self.screenbuf
+				sbuf.fill(Colors.BLACK, Rect(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
+				sbuf.blit(sbuf, (0, 0), Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT));
 
-			sbuf.fill(Colors.BLACK, Rect(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
-			sbuf.blit(sbuf, (0, 0), Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT));
+				sbuf.fill(Colors.BLACK, Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
+				self.generateScene(self.GAME_WIDTH)
 
-			sbuf.fill(Colors.BLACK, Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
-			self.generateScene(self.GAME_WIDTH)
-
-			self.screenbuf_delta_x = 0
+				self.screenbuf_delta_x = 0
 
 		self.player.update();
 		if (self.player.checkCollision(self.obstacles) == True):
-			self.player.startDie();
+			self.player.startAnimationDeath();
 
 	def draw(self):
 		self.player.draw(self.screenbuf);
