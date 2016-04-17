@@ -13,6 +13,8 @@ class GameWorld:
 	GAME_WIDTH = 1280
 	GAME_HEIGHT = 800
 	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
+	GAME_FPS = 120;
+	ANIMATION_FPS = GAME_FPS / 3;
 
 	OBSTACLE_MIN_HEIGHT = 50
 	OBSTACLE_MAX_HEIGHT = 125
@@ -33,6 +35,7 @@ class GameWorld:
 		
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.player = Character();
+		self.clock  = pygame.time.Clock();
 
 
 	def update(self):
@@ -48,6 +51,7 @@ class GameWorld:
 		self.state = self.STATE_PLAYING;
 
 		while self.state != self.STATE_FINISHED:
+			self.clock.tick(self.GAME_FPS);
 			for e in pygame.event.get():
 				if (e.type == pygame.QUIT):
 					self.state = self.STATE_FINISHED
@@ -64,7 +68,6 @@ class GameWorld:
 			self.draw();
 
 			pygame.display.flip()
-			time.sleep(1.0 / 30)
 
 	def generateObstacles(self):
 		self.obstacles = pygame.sprite.Group();

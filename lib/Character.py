@@ -41,6 +41,7 @@ class Character(pygame.sprite.Sprite):
 		self.last_rect = Rect(0, 0, 0, 0)
 		self.createCharater();
 		self.rect.bottom = self.GameWorld.GAME_HEIGHT
+		self.last_time = pygame.time.get_ticks();
 
 
 	def startDie(self):
@@ -50,7 +51,7 @@ class Character(pygame.sprite.Sprite):
 
 
 	def die(self):
-		time.sleep(1.0 / 10)
+		self.GameWorld.GAME_FPS
 		if (self.frame + 1 <= self.TOTAL_FRAMES):
 			self.frame += 1;
 			self.createCharater();
@@ -101,16 +102,21 @@ class Character(pygame.sprite.Sprite):
 		return True
 
 	def update(self):
+		time_between = pygame.time.get_ticks() - self.last_time;
+
 		if (self.action == self.ACTION_JUMP):
 			if (self.jump() == False):
 				self.action = self.ACTION_IDLE;
 
-		if (self.action == self.ACTION_DIE):
-			if (self.die() == False):
-				self.action = self.ACTION_IDLE;
+		if (time_between >= self.GameWorld.ANIMATION_FPS):
+			self.last_time = pygame.time.get_ticks();
+			if (self.action == self.ACTION_DIE):
+				if (self.die() == False):
+					self.action = self.ACTION_IDLE;
 
-		if (self.state == self.CHARACTER_STATE_ALIVE):
-			self.swim();
+			if (self.state == self.CHARACTER_STATE_ALIVE):
+				self.swim();
+
 
 	def draw(self, surface):
 		surface.fill(Colors.BLACK, self.last_rect)
@@ -120,5 +126,6 @@ class Character(pygame.sprite.Sprite):
 	def checkCollision(self, sprite_group):
 		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1):
 			return True
+		return False;
 
 
