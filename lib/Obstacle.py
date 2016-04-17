@@ -2,13 +2,15 @@
 
 import math
 import pygame
+from random import random
 
+import pygame.sprite
 from pygame import Rect
 from pygame import Surface
-from lib.Colors import Colors
-from random import random
-import pygame.sprite
+
 import lib.GameWorld
+from lib.Colors import Colors
+from lib.CachedAsset import load_cached_asset
 
 # Class reprenting an obstacle between the fluid pools
 
@@ -18,8 +20,8 @@ class Obstacle(pygame.sprite.Sprite):
 	Y_BIAS_MULT = 1.8
 
 	def __init__(self, width, height):
-		super(Obstacle, self).__init__();
-		self.obstacletxt = pygame.image.load("assets/img/obstacle4.png")
+		super(Obstacle, self).__init__()
+		self.obstacletxt = load_cached_asset("assets/img/obstacle4.png")
 		self.create(width, height),
 
 	def create(self, width, height):

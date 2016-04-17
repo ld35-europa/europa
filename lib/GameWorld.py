@@ -14,6 +14,7 @@ from lib.Colors import Colors
 from lib.Obstacle import Obstacle
 from lib.Fluid import Fluid
 from lib.MusicPlayer import MusicPlayer
+from lib.CachedAsset import load_cached_asset
 
 class GameWorld:
 	GAME_WIDTH = 1280
@@ -52,7 +53,7 @@ class GameWorld:
 		self.velocity = self.GAME_VELOCITY_X
 		self.screenbuf_delta_x = 0
 
-		self.player = Character();
+		self.player = Character()
 		self.music_player = MusicPlayer(self.player)
 		self.obstacles = None
 		self.fluids = None
@@ -142,7 +143,7 @@ class GameWorld:
 
 		while (x < maxx):
 			w = random.randrange(self.FLUID_MIN_W, self.FLUID_MAX_W+1)
-			h = 300
+			h = load_cached_asset("assets/img/fluid/lava.png").get_rect().height
 
 			# If the next rect were smaller than FLUID_MIN_W, stretch
 			# current to scene end. If the current rect is past scene end,
@@ -183,8 +184,7 @@ class GameWorld:
 
 			self.last_fluid = f
 			self.fluids.append(f)
-			sbuf = self.screenbuf
-			sbuf.fill(f.getColor(), r)
+			f.draw(self.screenbuf, r)
 
 	def generateObstacles(self, rects):
 
