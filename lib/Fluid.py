@@ -27,11 +27,20 @@ class Fluid(pygame.sprite.Sprite):
 		# Blit filling the destination rect horizontally
 
 		srcrect = self.image.get_rect()
-		blit_right_x = 0
-		
-		while (blit_right_x < dstrect.right):
-			surface.blit(self.image, (dstrect.left + blit_right_x, dstrect.top))
-			blit_right_x += srcrect.width
+		blit_delta_x = 0
+
+		while ((dstrect.left + blit_delta_x) < dstrect.right):
+			dstx = dstrect.left + blit_delta_x
+			blitarea = None
+
+			if (dstx + srcrect.width > dstrect.right):
+				blitarea = Rect(0, 0, dstrect.right-dstx, srcrect.height)
+
+			surface.blit(self.image, (dstx, dstrect.top), blitarea)
+			blit_delta_x += srcrect.width
+
+	def update(self):
+		return True;
 
 	def getType(self):
 		return self.ftype
