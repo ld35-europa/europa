@@ -30,7 +30,7 @@ class GameWorld:
 	FLUID_MAX_W = 1000
 
 	OBSTACLE_MIN_HEIGHT = 125
-	OBSTACLE_MAX_HEIGHT = 425
+	OBSTACLE_MAX_HEIGHT = 125
 	OBSTACLE_MIN_WIDTH = 150
 	OBSTACLE_MAX_WIDTH = 425
 
@@ -66,32 +66,37 @@ class GameWorld:
 
 		while self.state != self.STATE_FINISHED:
 			self.clock.tick(self.GAME_FPS);
+
 			for e in pygame.event.get():
 				if (e.type == pygame.QUIT):
 					self.state = self.STATE_FINISHED
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
-					if (\
-						e.key == pygame.K_SPACE and \
-						self.player.state == self.player.CHARACTER_STATE_ALIVE and \
-						self.player.action != self.player.ACTION_JUMP \
-					):
-						self.player.startJump()
+					#if (\
+					#	e.key == pygame.K_SPACE and \
+					#	self.player.state == self.player.CHARACTER_STATE_ALIVE and \
+						#self.player.action != self.player.ACTION_JUMP \
+					if (self.player.state == self.player.CHARACTER_STATE_ALIVE):
+						if (e.key == pygame.K_2):
+							self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_FIRE)
+						if (e.key == pygame.K_3):
+							self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_WATER)
+						if e.key == pygame.K_SPACE:
+							self.player.jumping = True
+						if (e.key == pygame.K_LEFT):
+							self.player.inputx -= 0.5
+						if (e.key == pygame.K_RIGHT):
+							self.player.inputx += 0.5
 					if (e.key == pygame.K_ESCAPE):
 						sys.exit(0)
-					if (e.key == pygame.K_1):
-						self.player.startAnimationDeath();
-					if (e.key == pygame.K_2):
-						self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_FIRE)
-					if (e.key == pygame.K_3):
-						self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_WATER)
+
 				elif (e.type == pygame.KEYUP):
-					if (\
-						e.key == pygame.K_SPACE and \
-						self.player.state == self.player.CHARACTER_STATE_ALIVE and \
-						self.player.action == self.player.ACTION_JUMP \
-					):
-						self.player.stopJump()
+					if e.key == pygame.K_SPACE:
+						self.player.jumping = False
+					if (e.key == pygame.K_LEFT):
+						self.player.inputx += 0.5
+					if (e.key == pygame.K_RIGHT):
+						self.player.inputx -= 0.5
 
 			self.update();
 			self.draw();
