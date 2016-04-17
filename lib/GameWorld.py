@@ -120,8 +120,16 @@ class GameWorld:
 				self.screenbuf_delta_x = 0
 
 		self.player.update();
-		if (self.player.checkCollision(self.obstacles) == True):
+		if (self.player.checkCollision(self.obstacles) != False):
 			self.player.startAnimationDeath();
+
+		if (self.fluids != None):
+			fluidCollisionSprite = self.player.checkCollision(self.fluids);
+			if (fluidCollisionSprite != False):
+				if (fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_LAVA and self.player.type == self.player.CHARACTER_TYPE_WATER):
+					self.player.startAnimationDeath();
+				elif (fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_WATER and self.player.type == self.player.CHARACTER_TYPE_FIRE):
+					self.player.startAnimationDeath();
 
 	def draw(self):
 		self.player.draw(self.screenbuf);
@@ -166,7 +174,7 @@ class GameWorld:
 		# Generate fluid pools (Fluid class) according to the
 		# passed Rect list
 
-		self.fluids = []
+		self.fluids = pygame.sprite.Group();
 
 		for r in (rects):
 			f = None
@@ -183,7 +191,7 @@ class GameWorld:
 					f = Fluid(Fluid.FLUID_TYPE_WATER, r)
 
 			self.last_fluid = f
-			self.fluids.append(f)
+			self.fluids.add(f)
 			f.draw(self.screenbuf, r)
 
 	def generateObstacles(self, rects):
