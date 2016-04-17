@@ -152,7 +152,7 @@ class Character(pygame.sprite.Sprite):
 				self.vx = 0;
 
 			## physics update
-			self.px = self.px + self.vx + 1 # * dt
+			self.px = self.px + self.vx # * dt
 			self.py = self.py + self.vy # * dt
 
 			self.rect.left = self.px - self.rect.width / 2
@@ -171,9 +171,7 @@ class Character(pygame.sprite.Sprite):
 				elif (self.animation == self.ANIMATION_TRANSFORM_TO_FIRE or self.animation == self.ANIMATION_TRANSFORM_TO_WATER):
 					self.animationTransform();
 
-
 	def draw(self, surface):
-		surface.fill(Colors.BLACK, self.last_rect)
 		surface.blit(self.image, self.rect)
 		self.last_rect = Rect(self.rect)
 
