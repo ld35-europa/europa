@@ -3,14 +3,16 @@
 import pygame
 import sys
 import time
+import random
 
-from random import random
 from pygame import Surface
 from pygame import Rect
 
+import lib.Colors
 from lib.Character import Character
 from lib.Colors import Colors
 from lib.Obstacle import Obstacle
+from lib.Fluid import Fluid
 
 class GameWorld:
 	GAME_WIDTH = 1280
@@ -22,6 +24,9 @@ class GameWorld:
 	BUF_HEIGHT = GAME_HEIGHT
 	GAME_FPS = 120;
 	ANIMATION_FPS = GAME_FPS / 3;
+
+	FLUID_MIN_W = 400
+	FLUID_MAX_W = 1000
 
 	OBSTACLE_MIN_HEIGHT = 125
 	OBSTACLE_MAX_HEIGHT = 125
@@ -47,10 +52,14 @@ class GameWorld:
 		self.screenbuf_delta_x = 0
 
 		self.player = Character();
+		self.obstacles = None
+		self.fluids = None
+		self.last_fluid = None
+
 		self.clock  = pygame.time.Clock();
 
 	def start(self):
-		self.generateObstacles();
+		self.generateScene();
 		self.state = self.STATE_PLAYING;
 
 		while self.state != self.STATE_FINISHED:
@@ -106,7 +115,7 @@ class GameWorld:
 				sbuf.blit(sbuf, (0, 0), Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT));
 
 				sbuf.fill(Colors.BLACK, Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
-				self.generateObstacles(self.GAME_WIDTH)
+				self.generateScene(self.GAME_WIDTH)
 
 				self.screenbuf_delta_x = 0
 
@@ -121,27 +130,79 @@ class GameWorld:
 	def getVelocity(self):
 		return self.velocity
 
-	def generateObstacles(self, startx=200):
-		self.obstacles = pygame.sprite.Group();
-		w = max(self.OBSTACLE_MIN_WIDTH, int(random() * self.OBSTACLE_MAX_WIDTH))
-		h = max(self.OBSTACLE_MIN_HEIGHT, int(random() * self.OBSTACLE_MAX_HEIGHT))
+	def generateScene(self, startx=0):
+
+		# Generate a new scene into the screen buffer, starting from x
+		# position startx
 
 		x = startx
-		maxx = self.screenbuf.get_rect().right
+		maxx = self.BUF_WIDTH
+		fluid_rects = []
+
+		# Generate fluid rects
 
 		while (x < maxx):
-			xdelta = int(random() * 1200)
-			xdelta = min(700, xdelta)
-			x += xdelta
+			w = random.randrange(self.FLUID_MIN_W, self.FLUID_MAX_W+1)
+			h = 150
 
-			w = max(self.OBSTACLE_MIN_WIDTH, int(random() * self.OBSTACLE_MAX_WIDTH))
-			h = max(self.OBSTACLE_MIN_HEIGHT, int(random() * self.OBSTACLE_MAX_HEIGHT))
+			# If the next rect were smaller than FLUID_MIN_W, stretch
+			# current to scene end. If the current rect is past scene end,
+			# chop off excess.
 
-			if (x + w > maxx): # break if wall goes over buffer edge
+			if ((maxx - (x + w) < self.FLUID_MIN_W) or (x + w > maxx)):
+				w = maxx - x
+
+			r = Rect(x, self.GAME_HEIGHT-h, w, h)
+			fluid_rects.append(r)
+			x += w
+
+		# Generate fluid pools and obstacles based on fluid rects
+
+		self.generateFluid(fluid_rects)
+		self.generateObstacles(fluid_rects)
+
+	def generateFluid(self, rects):
+
+		# Generate fluid pools (Fluid class) according to the
+		# passed Rect list
+
+		self.fluids = []
+
+		for r in (rects):
+			f = None
+
+			# If first fluid pool in scene, it must be of the same type as
+			# last fluid pool in the last scene. Random otherwise.
+
+			if (r == rects[0] and self.last_fluid):
+				f = Fluid(self.last_fluid.getType(), r)
+			else:
+				if (int(random.random() * 2)):
+					f = Fluid(Fluid.FLUID_TYPE_LAVA, r)
+				else:
+					f = Fluid(Fluid.FLUID_TYPE_WATER, r)
+
+			self.last_fluid = f
+			self.fluids.append(f)
+			sbuf = self.screenbuf
+			sbuf.fill(f.getColor(), r)
+
+	def generateObstacles(self, rects):
+
+		# Generate obstacles between the passed rects
+
+		self.obstacles = pygame.sprite.Group();
+
+		for r in rects:
+			if (r == rects[-1]):
 				break
+
+			xcenter = r.right
+			w = random.randrange(self.OBSTACLE_MIN_WIDTH, self.OBSTACLE_MAX_WIDTH+1)
+			h = random.randrange(self.OBSTACLE_MIN_HEIGHT, self.OBSTACLE_MAX_HEIGHT+1)
+			x = int(xcenter - (w/2.0))
 
 			obstacle = Obstacle(w, h)
 			obstacle.draw(self.screenbuf, x)
 			self.obstacles.add(obstacle)
 
-			x += w
