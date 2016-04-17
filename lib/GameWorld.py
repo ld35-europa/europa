@@ -19,7 +19,7 @@ class GameWorld:
 	GAME_WIDTH = 1280
 	GAME_HEIGHT = 800
 	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
-	GAME_VELOCITY = 1;
+	GAME_VELOCITY_X = 1;
 
 	BUF_WIDTH = GAME_WIDTH*2
 	BUF_HEIGHT = GAME_HEIGHT
@@ -49,7 +49,7 @@ class GameWorld:
 
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.screenbuf = Surface((self.BUF_WIDTH, self.BUF_HEIGHT))
-		self.velocity = self.GAME_VELOCITY
+		self.velocity = self.GAME_VELOCITY_X
 		self.screenbuf_delta_x = 0
 
 		self.player = Character();
@@ -72,10 +72,6 @@ class GameWorld:
 					self.state = self.STATE_FINISHED
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
-					#if (\
-					#	e.key == pygame.K_SPACE and \
-					#	self.player.state == self.player.CHARACTER_STATE_ALIVE and \
-						#self.player.action != self.player.ACTION_JUMP \
 					if (self.player.state == self.player.CHARACTER_STATE_ALIVE):
 						if (e.key == pygame.K_2):
 							self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_FIRE)
@@ -84,9 +80,9 @@ class GameWorld:
 						if e.key == pygame.K_SPACE:
 							self.player.jumping = True
 						if (e.key == pygame.K_LEFT):
-							self.player.inputx -= 0.5
+							self.player.inputx -= 1
 						if (e.key == pygame.K_RIGHT):
-							self.player.inputx += 0.5
+							self.player.inputx += 1
 					if (e.key == pygame.K_ESCAPE):
 						sys.exit(0)
 
@@ -94,9 +90,9 @@ class GameWorld:
 					if e.key == pygame.K_SPACE:
 						self.player.jumping = False
 					if (e.key == pygame.K_LEFT):
-						self.player.inputx += 0.5
+						self.player.inputx += 1
 					if (e.key == pygame.K_RIGHT):
-						self.player.inputx -= 0.5
+						self.player.inputx -= 1
 
 			self.update();
 			self.draw();
@@ -146,7 +142,7 @@ class GameWorld:
 
 		while (x < maxx):
 			w = random.randrange(self.FLUID_MIN_W, self.FLUID_MAX_W+1)
-			h = 150
+			h = 300
 
 			# If the next rect were smaller than FLUID_MIN_W, stretch
 			# current to scene end. If the current rect is past scene end,
