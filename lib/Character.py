@@ -65,6 +65,7 @@ class Character(pygame.sprite.Sprite):
 		self.animation = self.ANIMATION_DEATH
 		self.frame = 0
 		self.state = self.CHARACTER_STATE_DEAD
+		self.action = self.ACTION_IDLE;
 
 	def startAnimationTransform(self, animation):
 		if (animation == self.ANIMATION_TRANSFORM_TO_FIRE and self.type == self.CHARACTER_TYPE_WATER):
@@ -80,6 +81,7 @@ class Character(pygame.sprite.Sprite):
 			self.createCharater();
 		else:
 			self.animation = self.ANIMATION_NONE;
+
 
 	def animationSwim(self):
 		if (self.frame + 1 <= self.FRAMES_SWIM):
@@ -151,7 +153,11 @@ class Character(pygame.sprite.Sprite):
 			if (self.actionJump() == False):
 				self.action = self.ACTION_IDLE;
 
+		if (self.action == self.ACTION_IDLE and self.state == self.CHARACTER_STATE_ALIVE):
+			self.rect.left += self.GameWorld.GAME_VELOCITY;
+
 		if (time_between >= self.GameWorld.ANIMATION_FPS and self.animation != self.ANIMATION_NONE):
+
 			self.last_time = pygame.time.get_ticks();
 
 			if (self.animation == self.ANIMATION_DEATH):
