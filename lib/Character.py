@@ -93,7 +93,7 @@ class Character(pygame.sprite.Sprite):
 			return False
 		return True
 
-	def drawOnSurface(self, surface):
+	def update(self):
 		if (self.mode == self.MODE_JUMP):
 			if (self.jump() == False):
 				self.mode = self.MODE_IDLE;
@@ -102,6 +102,7 @@ class Character(pygame.sprite.Sprite):
 			if (self.die() == False):
 				self.mode = self.MODE_IDLE;
 
+	def draw(self, surface):
 		surface.fill(Colors.BLACK, self.last_rect)
 		surface.blit(self.image, self.rect)
 		self.last_rect = Rect(self.rect)

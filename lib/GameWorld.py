@@ -19,6 +19,12 @@ class GameWorld:
 	OBSTACLE_MIN_WIDTH = 100
 	OBSTACLE_MAX_WIDTH = 400
 
+	STATE_PLAYING = 0
+	STATE_PAUSED = 1
+	STATE_FINISHED = 2
+
+	state = STATE_FINISHED
+
 	BACKGROUND_COLOR = Colors.BLACK;
 
 	def __init__(self):
@@ -28,12 +34,21 @@ class GameWorld:
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.player = Character();
 
+	def update(self):
+		return False
+
+	def draw(self):
+		self.player.update();
+		self.player.draw(self.screen);
+
 	def start(self):
 		self.generateObstacles();
+		self.state = self.STATE_PLAYING;
 
-		while 1:
+		while self.state != self.STATE_FINISHED:
 			for e in pygame.event.get():
 				if (e.type == pygame.QUIT):
+					self.state = self.STATE_FINISHED
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
 					if (e.key == 32 and self.player.state == self.player.CHARACTER_STATE_ALIVE and self.player.mode != self.player.MODE_JUMP):
@@ -43,7 +58,8 @@ class GameWorld:
 					if (e.key == pygame.K_1):
 						self.player.startDie();
 
-			self.player.drawOnSurface(self.screen);
+			self.draw();
+
 			pygame.display.flip()
 			time.sleep(1.0 / 30)
 
