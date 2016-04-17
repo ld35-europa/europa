@@ -79,7 +79,7 @@ class GameWorld:
 						if (e.key == pygame.K_3):
 							self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_WATER)
 						if e.key == pygame.K_SPACE:
-							self.player.jumping = True
+							self.player.startJump()
 						if (e.key == pygame.K_LEFT):
 							self.player.inputx -= 1
 						if (e.key == pygame.K_RIGHT):
