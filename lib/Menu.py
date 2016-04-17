@@ -1,7 +1,8 @@
 
 import pygame
 import sys
-
+from pygame import sprite
+from pygame import image
 from lib.GameWorld import GameWorld
 from lib.Button import Button
 from lib.Colors import Colors
@@ -21,16 +22,13 @@ class Menu:
 		self.game.state = self.game.STATE_MENU
 
 		self.screen = pygame.display.set_mode(dimensions)
-		x = dimensions[0]/2 - self.buttonWidth/2
-		y = dimensions[1]/3 - self.buttonHeight/2
+		x = dimensions[0]/2
+		y = dimensions[1]/2
 
-		self.startButton = Button(x, y, self.buttonWidth, self.buttonHeight, "assets/img/menu/start_button.png")
-		y = y + self.buttonHeight + self.padding
+		self.startButton = Button(x, y, "assets/img/menu/start.png")
+		self.background = image.load("assets/img/menu/start_background.png")
+		self.background_rect = self.background.get_rect()
 
-		self.optionsButton = Button(x, y, self.buttonWidth, self.buttonHeight, "assets/img/menu/options_button.png")
-		y = y + self.buttonHeight + self.padding
-
-		self.exitButton = Button(x, y, self.buttonWidth, self.buttonHeight, "assets/img/menu/exit_button.png")
 
 	def start(self):
 		while self.game.state == self.game.STATE_MENU:
@@ -46,21 +44,14 @@ class Menu:
 				sys.exit(44)
 			if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
 				self.mouseDown = True
-
-		self.exitButton.render(self.screen)
-		self.startButton.render(self.screen)
-		self.optionsButton.render(self.screen)
-
+			if (e.type == pygame.KEYDOWN):
+				if e.key == pygame.K_RETURN:
+					self.game.state = self.game.STATE_PLAYING
+					self.game.start()
 		if self.mouseDown:
-			if self.exitButton.rect.collidepoint(mouseX, mouseY):
-				print("davai exitButton hit and shit")
-
-				sys.exit(52)
 			if self.startButton.rect.collidepoint(mouseX, mouseY):
-				print("davai startButton hit and shit")
-
-				self.screen.fill((Colors.BLACK))
 				self.game.state = self.game.STATE_PLAYING
 				self.game.start()
-
+		self.screen.blit(self.background, self.background_rect)
+		self.startButton.render(self.screen)
 		pygame.display.flip()
