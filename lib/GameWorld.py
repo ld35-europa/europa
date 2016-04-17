@@ -3,7 +3,10 @@
 import pygame
 import sys
 import time
+
 from random import random
+from pygame import Surface
+from pygame import Rect
 
 from lib.Character import Character
 from lib.Colors import Colors
@@ -13,13 +16,15 @@ class GameWorld:
 	GAME_WIDTH = 1280
 	GAME_HEIGHT = 800
 	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
+	BUF_WIDTH = GAME_WIDTH*2
+	BUF_HEIGHT = GAME_HEIGHT
 	GAME_FPS = 120;
 	ANIMATION_FPS = GAME_FPS / 3;
 
-	OBSTACLE_MIN_HEIGHT = 50
-	OBSTACLE_MAX_HEIGHT = 125
-	OBSTACLE_MIN_WIDTH = 50
-	OBSTACLE_MAX_WIDTH = 200
+	OBSTACLE_MIN_HEIGHT = 125
+	OBSTACLE_MAX_HEIGHT = 425
+	OBSTACLE_MIN_WIDTH = 150
+	OBSTACLE_MAX_WIDTH = 425
 
 	STATE_PLAYING = 0
 	STATE_PAUSED = 1
@@ -35,16 +40,12 @@ class GameWorld:
 		pygame.display.set_caption('Europa')
 
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
+		self.screenbuf = Surface((self.BUF_WIDTH, self.BUF_HEIGHT))
+		self.velocity = 5
+		self.screenbuf_delta_x = 0
+
 		self.player = Character();
 		self.clock  = pygame.time.Clock();
-
-	def update(self):
-		self.player.update();
-		if (self.player.checkCollision(self.obstacles) == True):
-			self.player.startDie();
-
-	def draw(self):
-		self.player.draw(self.screen);
 
 	def start(self):
 		self.generateObstacles();
@@ -73,19 +74,56 @@ class GameWorld:
 
 			pygame.display.flip()
 
-	def generateObstacles(self):
+	def update(self):
+		self.screenbuf_delta_x -= self.velocity
+
+		if (self.screenbuf_delta_x < -self.GAME_WIDTH):
+
+			# Screenbuf depleted. Copy second half of screenbuf to first,
+			# generate new second half, set buf -> screen blit delta to 0
+
+			sbuf = self.screenbuf
+
+			sbuf.fill(Colors.BLACK, Rect(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
+			sbuf.blit(sbuf, (0, 0), Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT));
+
+			sbuf.fill(Colors.BLACK, Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
+			self.generateObstacles(self.GAME_WIDTH)
+
+			self.screenbuf_delta_x = 0
+
+		self.player.update();
+		if (self.player.checkCollision(self.obstacles) == True):
+			self.player.startDie();
+
+	def draw(self):
+		self.player.draw(self.screenbuf);
+		self.screen.blit(self.screenbuf, (self.screenbuf_delta_x, 0));
+
+	def getVelocity(self):
+		return self.velocity
+
+	def generateObstacles(self, startx=200):
 		self.obstacles = pygame.sprite.Group();
 		w = max(self.OBSTACLE_MIN_WIDTH, int(random() * self.OBSTACLE_MAX_WIDTH))
 		h = max(self.OBSTACLE_MIN_HEIGHT, int(random() * self.OBSTACLE_MAX_HEIGHT))
 
-		x = 200
-		while (x < self.GAME_WIDTH):
-			xdelta = int(random() * 400)
-			xdelta = min(150, xdelta)
+		x = startx
+		maxx = self.screenbuf.get_rect().right
+
+		while (x < maxx):
+			xdelta = int(random() * 1200)
+			xdelta = min(700, xdelta)
 			x += xdelta
+
 			w = max(self.OBSTACLE_MIN_WIDTH, int(random() * self.OBSTACLE_MAX_WIDTH))
 			h = max(self.OBSTACLE_MIN_HEIGHT, int(random() * self.OBSTACLE_MAX_HEIGHT))
 
-			obstacle = Obstacle(w, h);
-			obstacle.draw(self.screen, x);
+			if (x + w > maxx): # break if wall goes over buffer edge
+				break
+
+			obstacle = Obstacle(w, h)
+			obstacle.draw(self.screenbuf, x)
 			self.obstacles.add(obstacle)
+
+			x += w
