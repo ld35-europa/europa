@@ -1,13 +1,12 @@
 
 import pygame
-import sys
-from pygame import sprite
 from pygame import image
-from lib.GameWorld import GameWorld
 from lib.Button import Button
 from lib.Colors import Colors
 from lib.GameWorld import GameWorld
 from lib.Character import Character
+from pygame import Surface
+
 
 class Menu:
 
@@ -44,7 +43,11 @@ class Menu:
 			game.state = game.STATE_PLAYING
 
 		elif game.state == game.STATE_FINISHED and self.againButton.rect.collidepoint(mouse[0], mouse[1]):
+			tmpfire = game.music_player.music_fire
+			tmpwater = game.music_player.music_water
+			game.destroy()
+			game = GameWorld(self)
+			game.music_player.music_fire = tmpfire
+			game.music_player.music_water = tmpwater
 			game.state = game.STATE_PLAYING
-			self.game.player = Character()
-			self.game.generateScene();
-			self.game.screenbuf_delta_x = 0
+			game.start()

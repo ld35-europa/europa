@@ -64,6 +64,7 @@ class GameWorld:
 
 		self.music_player = MusicPlayer(self.player)
 		self.clock  = pygame.time.Clock();
+		self.destroyed = False
 
 		# Initial backgrounds
 
@@ -76,7 +77,7 @@ class GameWorld:
 		self.generateScene();
 		self.setPlayerInitialPhase()
 
-		while True:
+		while (not self.destroyed):
 			self.clock.tick(self.GAME_FPS);
 
 			for e in pygame.event.get():
@@ -112,6 +113,7 @@ class GameWorld:
 				self.update();
 				self.draw();
 				self.music_player.update()
+				self.player.update()
 				pygame.display.flip()
 
 			if self.state == self.STATE_MENU or self.state == self.STATE_FINISHED:
@@ -178,6 +180,11 @@ class GameWorld:
 			Character.CHARACTER_TYPE_FIRE \
 			if ftype == Fluid.FLUID_TYPE_LAVA \
 			else Character.CHARACTER_TYPE_WATER
+
+	def destroy(self):
+		self.destroyed = True
+		#self.music_player.music_fire.stop()
+		#self.music_player.music_water.stop()
 
 	def generateScene(self, startx=0):
 

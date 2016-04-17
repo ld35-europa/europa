@@ -8,12 +8,15 @@ class MusicPlayer:
 		pygame.mixer.init(44100, -16, 2, 32768)
 		self.music_fire = pygame.mixer.Sound("assets/sounds/music_fire.ogg")
 		self.music_water = pygame.mixer.Sound("assets/sounds/music_water.ogg")
+		#TODO: get the initial desired sound from the character.
 		self.fire_vol = 1
 		self.water_vol = 0
 		self.fire_desired_vol = 1
 		self.water_desired_vol = 0
-		pygame.mixer.find_channel().play(self.music_fire, -1)
-		pygame.mixer.find_channel().play(self.music_water, -1)
+		if not pygame.mixer.Channel(1).get_busy():
+			pygame.mixer.Channel(1).play(self.music_fire, -1)
+		if not pygame.mixer.Channel(2).get_busy():
+			pygame.mixer.Channel(2).play(self.music_water, -1)
 		self.music_fire.set_volume(self.fire_vol)
 		self.music_water.set_volume(self.water_vol)
 
