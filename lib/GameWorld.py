@@ -32,7 +32,7 @@ class GameWorld:
 	def __init__(self):
 		pygame.init()
 		pygame.display.set_caption('Europa')
-		
+
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.player = Character();
 		self.clock  = pygame.time.Clock();
@@ -57,7 +57,11 @@ class GameWorld:
 					self.state = self.STATE_FINISHED
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
-					if (e.key == 32 and self.player.state == self.player.CHARACTER_STATE_ALIVE and self.player.action != self.player.ACTION_JUMP):
+					if (\
+						e.key == 32 and \
+						self.player.state == self.player.CHARACTER_STATE_ALIVE and \
+						self.player.action != self.player.ACTION_JUMP \
+					):
 						self.player.startJump()
 					if (e.key == pygame.K_ESCAPE):
 						sys.exit(0)

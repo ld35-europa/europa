@@ -32,7 +32,10 @@ class Character(pygame.sprite.Sprite):
 	state = CHARACTER_STATE_ALIVE
 	frame = 0
 
-	def __init__(self, character_type = CHARACTER_TYPE_FIRE, character_state = CHARACTER_STATE_ALIVE, frame_num = 0):
+	def __init__(\
+		self, character_type = CHARACTER_TYPE_FIRE, character_state = CHARACTER_STATE_ALIVE, \
+		frame_num = 0 \
+	):
 		super(Character, self).__init__();
 		self.type = character_type
 		self.state = character_state
