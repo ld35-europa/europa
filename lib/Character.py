@@ -47,11 +47,13 @@ class Character(pygame.sprite.Sprite):
 		self.rect.bottom = self.GameWorld.GAME_HEIGHT
 		self.last_time = pygame.time.get_ticks();
 
+		self.starting_y = (2.0/3.0) * self.GameWorld.GAME_HEIGHT;
+
 		self.vx = 0
 		self.vy = 0
 
 		self.px = 100
-		self.py = (2.0/3.0) * self.GameWorld.GAME_HEIGHT
+		self.py = self.starting_y
 
 		self.inputx = 0 # -1 = left, 1 = right
 		self.jumping = False
@@ -75,9 +77,11 @@ class Character(pygame.sprite.Sprite):
 		if (animation == self.ANIMATION_TRANSFORM_TO_FIRE and self.type == self.CHARACTER_TYPE_WATER):
 			pygame.mixer.find_channel().play(self.shapeshift_sound)
 			self.frame = self.FRAMES_TRANSFORM
+			self.type = self.CHARACTER_TYPE_FIRE
 			self.animation = self.ANIMATION_TRANSFORM_TO_FIRE
 		elif (animation == self.ANIMATION_TRANSFORM_TO_WATER and self.type == self.CHARACTER_TYPE_FIRE):
 			pygame.mixer.find_channel().play(self.shapeshift_sound)
+			self.type = self.CHARACTER_TYPE_WATER
 			self.frame = 0
 			self.animation = self.ANIMATION_TRANSFORM_TO_WATER
 
@@ -126,11 +130,14 @@ class Character(pygame.sprite.Sprite):
 		self.image = pygame.image.load(image_path);
 		if (hasattr(self, 'rect')):
 			rect = self.image.get_rect()
+			rect.height = rect.height / 2;
 			rect.left = self.rect.left
 			rect.bottom = self.rect.bottom
 			self.rect = rect
 		else:
 			self.rect = self.image.get_rect()
+			self.rect.height = self.rect.height / 2
+
 
 	def update(self):
 		time_between = pygame.time.get_ticks() - self.last_time;
@@ -141,7 +148,7 @@ class Character(pygame.sprite.Sprite):
 				self.vy += -4.0 * self.jumpcapacity
 				self.jumpcapacity *= 0.9
 
-			inwater = self.py > (2.0/3.0) * self.GameWorld.GAME_HEIGHT
+			inwater = self.py > self.starting_y
 			if inwater:
 				if self.vy > 0:
 					self.vy *= 0.7
@@ -180,10 +187,13 @@ class Character(pygame.sprite.Sprite):
 
 	def draw(self, surface):
 		surface.fill(Colors.BLACK, self.last_rect)
-		surface.blit(self.image, self.rect)
-		self.last_rect = Rect(self.rect)
+		image_rect = self.image.get_rect();
+		image_rect.x = self.rect.x;
+		image_rect.y = self.rect.y;
+		surface.blit(self.image, image_rect)
+		self.last_rect = Rect(image_rect)
 
-	def checkCollision(self, sprite_group):
+	def checkCollision(self, sprite_group,):
 		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1):
 			return sprite
 		return False;

@@ -152,7 +152,7 @@ class GameWorld:
 		while (x < maxx):
 			w = random.randrange(self.FLUID_MIN_W, self.FLUID_MAX_W+1)
 			h = load_cached_asset("assets/img/fluid/lava.png").get_rect().height
-
+			print h;
 			# If the next rect were smaller than FLUID_MIN_W, stretch
 			# current to scene end. If the current rect is past scene end,
 			# chop off excess.
@@ -160,7 +160,7 @@ class GameWorld:
 			if ((maxx - (x + w) < self.FLUID_MIN_W) or (x + w > maxx)):
 				w = maxx - x
 
-			r = Rect(x, self.GAME_HEIGHT-h, w, h)
+			r = Rect(x, self.GAME_HEIGHT-h+50, w, h)
 			fluid_rects.append(r)
 			x += w
 
