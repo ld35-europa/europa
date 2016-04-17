@@ -131,15 +131,21 @@ class GameWorld:
 				self.scenebuf_delta_x = 0
 
 		self.player.update();
-		if (self.player.checkCollision(self.obstacles) != False):
+		if (self.player.checkCollision(self.obstacles, self.scenebuf_delta_x) != False):
 			self.player.startAnimationDeath();
 
 		if (self.fluids != None):
-			fluidCollisionSprite = self.player.checkCollision(self.fluids);
+			fluidCollisionSprite = self.player.checkCollision(self.fluids, self.scenebuf_delta_x);
 			if (fluidCollisionSprite != False):
-				if (fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_LAVA and self.player.type == self.player.CHARACTER_TYPE_WATER):
+				if (\
+					fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_LAVA and \
+					self.player.type == self.player.CHARACTER_TYPE_WATER \
+				):
 					self.player.startAnimationDeath();
-				elif (fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_WATER and self.player.type == self.player.CHARACTER_TYPE_FIRE):
+				elif (\
+					fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_WATER and \
+					self.player.type == self.player.CHARACTER_TYPE_FIRE \
+				):
 					self.player.startAnimationDeath();
 
 	def draw(self):

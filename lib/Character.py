@@ -201,8 +201,15 @@ class Character(pygame.sprite.Sprite):
 	def draw(self, surface):
 		surface.blit(self.image, self.rect)
 
-	def checkCollision(self, sprite_group):
-		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1):
+	def checkCollision(self, sprite_group, surfaces_delta_x):
+		def collision_detector(sprite1, sprite2):
+			if (type(sprite2) is lib.Fluid.Fluid):
+				return False
+			collrect = Rect(sprite2.rect)
+			collrect.left += surfaces_delta_x			
+			return (sprite1.rect.colliderect(collrect))
+
+		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1, collision_detector):
 			return sprite
 		return False;
 
