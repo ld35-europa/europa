@@ -9,8 +9,8 @@ from lib.Colors import Colors
 from lib.CachedAsset import load_cached_asset
 
 class Fluid(pygame.sprite.Sprite):
-	FLUID_TYPE_WATER = 1
-	FLUID_TYPE_LAVA = 2
+	FLUID_TYPE_WATER = "water"
+	FLUID_TYPE_LAVA = "lava"
 
 	def __init__(self, ftype, rect):
 		super(Fluid, self).__init__();

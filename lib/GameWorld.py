@@ -59,6 +59,7 @@ class GameWorld:
 		self.player = Character()
 		self.obstacles = None
 		self.fluids = None
+		self.first_fluid = None
 		self.last_fluid = None
 
 		self.music_player = MusicPlayer(self.player)
@@ -73,6 +74,7 @@ class GameWorld:
 
 	def start(self):
 		self.generateScene();
+		self.setPlayerInitialPhase()
 
 		while True:
 			self.clock.tick(self.GAME_FPS);
@@ -135,8 +137,6 @@ class GameWorld:
 				self.scenebuf_delta_x = 0
 		elif (self.player.animation == self.player.ANIMATION_NONE and self.player.state == self.player.CHARACTER_STATE_DEAD):
 			self.state = self.STATE_FINISHED
-		self.player.update();
-
 		if (self.player.checkCollision(self.obstacles) != False):
 			self.player.startAnimationDeath();
 
@@ -171,6 +171,13 @@ class GameWorld:
 		bgsrcx = int((bgrect.width / 2.0) - (dst_rect.width / 2.0))
 
 		dst_surface.blit(bg, dst_rect, Rect(bgsrcx, 0, dst_rect.width, dst_rect.height))
+
+	def setPlayerInitialPhase(self):
+		ftype = self.first_fluid.getType()
+		self.player.type = \
+			Character.CHARACTER_TYPE_FIRE \
+			if ftype == Fluid.FLUID_TYPE_LAVA \
+			else Character.CHARACTER_TYPE_WATER
 
 	def generateScene(self, startx=0):
 
@@ -224,6 +231,8 @@ class GameWorld:
 				else:
 					f = Fluid(Fluid.FLUID_TYPE_WATER, r)
 
+			if (not self.first_fluid):
+				self.first_fluid = f
 			self.last_fluid = f
 			self.fluids.add(f)
 			f.draw(self.scenebuf, r)
