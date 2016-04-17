@@ -49,7 +49,7 @@ class Character(pygame.sprite.Sprite):
 		self.vx = 0
 		self.vy = 0
 
-		self.px = 0
+		self.px = 100
 		self.py = (2.0/3.0) * self.GameWorld.GAME_HEIGHT
 
 		self.inputx = 0 # -1 = left, 1 = right
@@ -132,7 +132,7 @@ class Character(pygame.sprite.Sprite):
 			inwater = self.py > (2.0/3.0) * self.GameWorld.GAME_HEIGHT
 			if inwater:
 				if self.vy > 0:
-					self.vy *= 0.8
+					self.vy *= 0.7
 					if not self.jumping:
 						self.jumpcapacity = 1
 			else:
@@ -142,6 +142,8 @@ class Character(pygame.sprite.Sprite):
 			if self.inputx != 0:
 				movement_velocity = 5
 				self.vx = self.inputx * movement_velocity
+			else:
+				self.vx = 0;
 
 			## physics update
 			self.px = self.px + self.vx + 1 # * dt
@@ -173,5 +175,3 @@ class Character(pygame.sprite.Sprite):
 		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1):
 			return True
 		return False;
-
-
