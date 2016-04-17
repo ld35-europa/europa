@@ -40,14 +40,15 @@ class GameWorld:
 	STATE_FINISHED = 2
 	STATE_MENU = 3
 
-	state = STATE_FINISHED
+	state = STATE_MENU
 
 	BACKGROUND_COLOR = Colors.BLACK;
 
-	def __init__(self):
+	def __init__(self, menu):
 		pygame.init()
 		pygame.display.set_caption('Europa')
 
+		self.menu = menu
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.scenebuf = Surface((self.SCENE_BUF_WIDTH, self.SCENE_BUF_HEIGHT))
 		self.backbuf = Surface((self.GAME_WIDTH, self.GAME_HEIGHT))
@@ -63,7 +64,8 @@ class GameWorld:
 
 		self.music_player = MusicPlayer(self.player)
 		self.clock  = pygame.time.Clock();
-
+		self.destroyed = False
+		
 		# Initial backgrounds
 
 		bg_dest_rect = self.screen.get_rect()
@@ -74,9 +76,8 @@ class GameWorld:
 	def start(self):
 		self.generateScene();
 		self.setPlayerInitialPhase()
-		self.state = self.STATE_PLAYING;
 
-		while self.state != self.STATE_FINISHED:
+		while (not self.destroyed):
 			self.clock.tick(self.GAME_FPS);
 
 			for e in pygame.event.get():
@@ -97,7 +98,8 @@ class GameWorld:
 							self.player.inputx += 1
 					if (e.key == pygame.K_ESCAPE):
 						sys.exit(0)
-
+					if (e.key == pygame.K_RETURN and (self.state == self.STATE_MENU or self.state == self.STATE_FINISHED)):
+						self.menu.createNew(self)
 				elif (e.type == pygame.KEYUP):
 					if e.key == pygame.K_SPACE:
 						self.player.jumping = False
@@ -105,12 +107,16 @@ class GameWorld:
 						self.player.inputx += 1
 					if (e.key == pygame.K_RIGHT):
 						self.player.inputx -= 1
-
-			self.update();
-			self.draw();
-			self.music_player.update()
-
-			pygame.display.flip()
+				elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+					if self.state == self.STATE_MENU or self.state == self.STATE_FINISHED:
+						self.menu.checkClick(pygame.mouse.get_pos(), self)
+			
+			if (self.state == self.STATE_PLAYING):
+				self.update();
+				self.draw();
+				pygame.display.flip()
+			elif (self.state == self.STATE_MENU or self.state == self.STATE_FINISHED):
+				self.menu.render(self)
 
 	def update(self):
 		if (self.player.state == self.player.CHARACTER_STATE_ALIVE):
@@ -129,8 +135,15 @@ class GameWorld:
 				self.generateScene(self.GAME_WIDTH)
 
 				self.scenebuf_delta_x = 0
+		elif (\
+			self.player.animation == self.player.ANIMATION_NONE and \
+			self.player.state == self.player.CHARACTER_STATE_DEAD\
+		):
+			self.state = self.STATE_FINISHED
 
-		self.player.update();
+		self.music_player.update()
+		self.player.update()
+		
 		if (self.player.checkCollision(self.obstacles, self.scenebuf_delta_x) != False):
 			self.player.startAnimationDeath();
 
@@ -178,6 +191,11 @@ class GameWorld:
 			Character.CHARACTER_TYPE_FIRE \
 			if ftype == Fluid.FLUID_TYPE_LAVA \
 			else Character.CHARACTER_TYPE_WATER
+
+	def destroy(self):
+		self.destroyed = True
+		#self.music_player.music_fire.stop()
+		#self.music_player.music_water.stop()
 
 	def generateScene(self, startx=0):
 
@@ -255,3 +273,4 @@ class GameWorld:
 			obstacle = Obstacle(w, h)
 			obstacle.draw(self.scenebuf, x)
 			self.obstacles.add(obstacle)
+

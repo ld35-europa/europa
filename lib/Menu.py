@@ -1,57 +1,60 @@
 
 import pygame
-import sys
-from pygame import sprite
 from pygame import image
-from lib.GameWorld import GameWorld
 from lib.Button import Button
 from lib.Colors import Colors
+from lib.GameWorld import GameWorld
+from lib.Character import Character
+from pygame import Surface
 
 
 class Menu:
 
-	buttonWidth = 300
-	buttonHeight = 150
-	padding = 10
-	mouseDown = False
+	def __init__(self):
 
-	def __init__(self, dimensions):
-		pygame.init()
-		pygame.display.set_caption('Europa')
-		self.game = GameWorld()
-		self.game.state = self.game.STATE_MENU
-
-		self.screen = pygame.display.set_mode(dimensions)
-		x = dimensions[0]/2
-		y = dimensions[1]/2
-
+		x = GameWorld.GAME_DIMENSION[0]/2
+		y = GameWorld.GAME_DIMENSION[1]/2
 		self.startButton = Button(x, y, "assets/img/menu/start.png")
+
+		x = GameWorld.GAME_DIMENSION[0]/1.7
+		y = GameWorld.GAME_DIMENSION[1]/1.222
+		self.againButton = Button(x, y, "assets/img/menu/again.png")
+
 		self.background = image.load("assets/img/menu/start_background.png")
 		self.background_rect = self.background.get_rect()
+		self.gameover = image.load("assets/img/menu/gameover.png")
+		self.gameover_rect = self.gameover.get_rect()
 
 
-	def start(self):
-		while self.game.state == self.game.STATE_MENU:
-			self.render()
+	def render(self, game):
+		self.game = game
+		self.game.screen.fill(Colors.BLACK)
 
-	def render(self):
-		self.screen.fill((Colors.BLACK))
-		self.mouseDown = False
-		mouseX, mouseY = pygame.mouse.get_pos()
-
-		for e in pygame.event.get():
-			if e.type == pygame.QUIT:
-				sys.exit(44)
-			if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-				self.mouseDown = True
-			if (e.type == pygame.KEYDOWN):
-				if e.key == pygame.K_RETURN:
-					self.game.state = self.game.STATE_PLAYING
-					self.game.start()
-		if self.mouseDown:
-			if self.startButton.rect.collidepoint(mouseX, mouseY):
-				self.game.state = self.game.STATE_PLAYING
-				self.game.start()
-		self.screen.blit(self.background, self.background_rect)
-		self.startButton.render(self.screen)
+		if self.game.state == self.game.STATE_MENU:
+			self.game.screen.blit(self.background, self.background_rect)
+			self.startButton.render(self.game.screen)
+		else:
+			self.game.screen.blit(self.gameover, self.gameover_rect)
+			self.againButton.render(self.game.screen)
 		pygame.display.flip()
+
+	def checkClick(self, mouse, game):
+		if game.state == game.STATE_MENU and self.startButton.rect.collidepoint(mouse[0], mouse[1]):
+			game.state = game.STATE_PLAYING
+
+		elif game.state == game.STATE_FINISHED and self.againButton.rect.collidepoint(mouse[0], mouse[1]):
+			self.createNew(game)
+
+	def createNew(self, game):
+		fire = game.music_player.music_fire
+		water = game.music_player.music_water
+		fire_vol = game.music_player.fire_vol
+		water_vol = game.music_player.water_vol
+		game.destroy()
+		game = GameWorld(self)
+		game.music_player.music_fire = fire
+		game.music_player.music_water = water
+		game.music_player.fire_vol = fire_vol
+		game.music_player.water_vol = water_vol
+		game.state = game.STATE_PLAYING
+		game.start()
