@@ -20,12 +20,14 @@ class Character(pygame.sprite.Sprite):
 	ANIMATION_DEATH = 1;
 	ANIMATION_TRANSFORM_TO_FIRE = 2;
 	ANIMATION_TRANSFORM_TO_WATER = 3;
-	ANIMATION_NONE = 4;
+	ANIMATION_JUMP = 4;
+	ANIMATION_NONE = 5;
 
 	FRAMES_SWIM = 7;
 	FRAMES_DEATH_FIRE = 7;
 	FRAME_DEATH_WATER = 9;
 	FRAMES_TRANSFORM = 9;
+	FRAMES_JUMP = 3;
 
 	animation = ANIMATION_SWIM
 	type = CHARACTER_TYPE_FIRE
@@ -96,6 +98,16 @@ class Character(pygame.sprite.Sprite):
 		else:
 			self.animation = self.ANIMATION_NONE;
 
+	def animationJump(self):
+		if (self.vy < 0):
+			if (self.frame + 1 <= self.FRAMES_JUMP):
+				self.frame += 1;
+			else:
+				self.frame = 0;
+		else:
+			self.startAnimationSwim()
+		self.createCharater();
+
 	def animationSwim(self):
 		if (self.frame + 1 <= self.FRAMES_SWIM):
 			self.frame += 1;
@@ -122,6 +134,8 @@ class Character(pygame.sprite.Sprite):
 	def createCharater(self):
 		if (self.animation == self.ANIMATION_TRANSFORM_TO_FIRE or self.animation == self.ANIMATION_TRANSFORM_TO_WATER):
 			image_path = "assets/img/transform/" + str(self.frame) + ".png";
+		elif (self.animation == self.ANIMATION_JUMP):
+			image_path = "assets/img/" + self.type + "/jump/" + str(self.frame) + ".png";
 		else:
 			image_path = "assets/img/" + self.type + "/" + self.state + "/" + str(self.frame) + ".png";
 
@@ -177,7 +191,9 @@ class Character(pygame.sprite.Sprite):
 				self.animationDeath();
 
 			if (self.state == self.CHARACTER_STATE_ALIVE):
-			 	if (self.animation == self.ANIMATION_SWIM):
+				if (self.animation == self.ANIMATION_JUMP):
+					self.animationJump()
+			 	elif (self.animation == self.ANIMATION_SWIM):
 					self.animationSwim();
 				elif (self.animation == self.ANIMATION_TRANSFORM_TO_FIRE or self.animation == self.ANIMATION_TRANSFORM_TO_WATER):
 					self.animationTransform();
@@ -192,4 +208,7 @@ class Character(pygame.sprite.Sprite):
 
 	def startJump(self):
 		self.jumping = True
+		if (self.type == self.CHARACTER_TYPE_WATER):
+			self.animation = self.ANIMATION_JUMP;
+			self.frame = 0;
 		pygame.mixer.find_channel().play(self.jump_sound)

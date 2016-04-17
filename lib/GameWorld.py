@@ -98,7 +98,8 @@ class GameWorld:
 							self.player.inputx += 1
 					if (e.key == pygame.K_ESCAPE):
 						sys.exit(0)
-
+					if (e.key == pygame.K_RETURN and (self.state == self.STATE_MENU or self.state == self.STATE_FINISHED)):
+						self.menu.createNew(self)
 				elif (e.type == pygame.KEYUP):
 					if e.key == pygame.K_SPACE:
 						self.player.jumping = False

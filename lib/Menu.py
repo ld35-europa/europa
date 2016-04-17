@@ -43,11 +43,18 @@ class Menu:
 			game.state = game.STATE_PLAYING
 
 		elif game.state == game.STATE_FINISHED and self.againButton.rect.collidepoint(mouse[0], mouse[1]):
-			tmpfire = game.music_player.music_fire
-			tmpwater = game.music_player.music_water
-			game.destroy()
-			game = GameWorld(self)
-			game.music_player.music_fire = tmpfire
-			game.music_player.music_water = tmpwater
-			game.state = game.STATE_PLAYING
-			game.start()
+			self.createNew(game)
+
+	def createNew(self, game):
+		fire = game.music_player.music_fire
+		water = game.music_player.music_water
+		fire_vol = game.music_player.fire_vol
+		water_vol = game.music_player.water_vol
+		game.destroy()
+		game = GameWorld(self)
+		game.music_player.music_fire = fire
+		game.music_player.music_water = water
+		game.music_player.fire_vol = fire_vol
+		game.music_player.water_vol = water_vol
+		game.state = game.STATE_PLAYING
+		game.start()
