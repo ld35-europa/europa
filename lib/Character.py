@@ -23,7 +23,8 @@ class Character(pygame.sprite.Sprite):
 	ANIMATION_NONE = 4;
 
 	FRAMES_SWIM = 7;
-	FRAMES_DEATH = 7;
+	FRAMES_DEATH_FIRE = 7;
+	FRAME_DEATH_WATER = 9;
 	FRAMES_TRANSFORM = 9;
 
 	animation = ANIMATION_SWIM
@@ -75,7 +76,12 @@ class Character(pygame.sprite.Sprite):
 			self.animation = self.ANIMATION_TRANSFORM_TO_WATER
 
 	def animationDeath(self):
-		if (self.frame + 1 <= self.FRAMES_DEATH):
+		if (self.type == self.CHARACTER_TYPE_WATER):
+			death_frames = self.FRAME_DEATH_WATER;
+		else:
+			death_frames = self.FRAMES_DEATH_FIRE;
+
+		if (self.frame + 1 <= death_frames):
 			self.frame += 1;
 			self.createCharater();
 		else:
