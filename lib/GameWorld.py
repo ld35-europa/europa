@@ -40,14 +40,15 @@ class GameWorld:
 	STATE_FINISHED = 2
 	STATE_MENU = 3
 
-	state = STATE_FINISHED
+	state = STATE_MENU
 
 	BACKGROUND_COLOR = Colors.BLACK;
 
-	def __init__(self):
+	def __init__(self, menu):
 		pygame.init()
 		pygame.display.set_caption('Europa')
 
+		self.menu = menu
 		self.screen = pygame.display.set_mode(self.GAME_DIMENSION);
 		self.screenbuf = Surface((self.BUF_WIDTH, self.BUF_HEIGHT))
 		self.velocity = self.GAME_VELOCITY_X
@@ -63,9 +64,9 @@ class GameWorld:
 
 	def start(self):
 		self.generateScene();
-		self.state = self.STATE_PLAYING;
+		#self.state = self.STATE_PLAYING;
 
-		while self.state != self.STATE_FINISHED:
+		while True:
 			self.clock.tick(self.GAME_FPS);
 
 			for e in pygame.event.get():
@@ -94,12 +95,19 @@ class GameWorld:
 						self.player.inputx += 1
 					if (e.key == pygame.K_RIGHT):
 						self.player.inputx -= 1
+				elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+					if self.state == self.STATE_MENU or self.state == self.STATE_FINISHED:
+						self.menu.checkClick(pygame.mouse.get_pos(), self)
 
-			self.update();
-			self.draw();
-			self.music_player.update()
+			if self.state == self.STATE_PLAYING:
+				self.update();
+				self.draw();
+				self.music_player.update()
+				pygame.display.flip()
 
-			pygame.display.flip()
+			if self.state == self.STATE_MENU or self.state == self.STATE_FINISHED:
+				self.menu.render(self)
+
 
 	def update(self):
 		if (self.player.state == self.player.CHARACTER_STATE_ALIVE):
@@ -118,8 +126,10 @@ class GameWorld:
 				self.generateScene(self.GAME_WIDTH)
 
 				self.screenbuf_delta_x = 0
-
+		elif (self.player.animation == self.player.ANIMATION_NONE and self.player.state == self.player.CHARACTER_STATE_DEAD):
+			self.state = self.STATE_FINISHED
 		self.player.update();
+
 		if (self.player.checkCollision(self.obstacles) == True):
 			self.player.startAnimationDeath();
 
@@ -204,3 +214,4 @@ class GameWorld:
 			obstacle = Obstacle(w, h)
 			obstacle.draw(self.screenbuf, x)
 			self.obstacles.add(obstacle)
+

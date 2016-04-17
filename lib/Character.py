@@ -93,7 +93,6 @@ class Character(pygame.sprite.Sprite):
 		else:
 			self.animation = self.ANIMATION_NONE;
 
-
 	def animationSwim(self):
 		if (self.frame + 1 <= self.FRAMES_SWIM):
 			self.frame += 1;
