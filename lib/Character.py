@@ -22,7 +22,7 @@ class Character(pygame.sprite.Sprite):
 	ACTION_JUMP = 0
 	ACTION_IDLE = 2;
 
-	JUMP_LENGTH = 200
+	JUMP_LENGTH = 600
 	JUMP_HEIGHT_MULT = 2.5
 
 	ANIMATION_SWIM = 0;
@@ -120,6 +120,9 @@ class Character(pygame.sprite.Sprite):
 			self.rect = rect
 		else:
 			self.rect = self.image.get_rect()
+
+	def stopJump(self):
+		return True;
 
 	def startJump(self):
 		self.jump_start_position_x = self.rect.left

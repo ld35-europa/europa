@@ -61,7 +61,7 @@ class GameWorld:
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
 					if (\
-						e.key == 32 and \
+						e.key == pygame.K_SPACE and \
 						self.player.state == self.player.CHARACTER_STATE_ALIVE and \
 						self.player.action != self.player.ACTION_JUMP \
 					):
@@ -74,6 +74,13 @@ class GameWorld:
 						self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_FIRE)
 					if (e.key == pygame.K_3):
 						self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_WATER)
+				elif (e.type == pygame.KEYUP):
+					if (\
+						e.key == pygame.K_SPACE and \
+						self.player.state == self.player.CHARACTER_STATE_ALIVE and \
+						self.player.action == self.player.ACTION_JUMP \
+					):
+						self.player.stopJump()
 
 			self.update();
 			self.draw();
