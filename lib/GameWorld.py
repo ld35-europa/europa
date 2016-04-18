@@ -65,7 +65,7 @@ class GameWorld:
 		self.music_player = MusicPlayer(self.player)
 		self.clock  = pygame.time.Clock();
 		self.destroyed = False
-		
+
 		# Initial backgrounds
 
 		bg_dest_rect = self.screen.get_rect()
@@ -74,11 +74,11 @@ class GameWorld:
 		self.fillBackground(self.scenebuf, bg_dest_rect)
 
 	def start(self):
-		self.generateScene();
-		self.setPlayerInitialPhase()
+		self.generateScene()
+		self.initPlayer()
 
 		while (not self.destroyed):
-			self.clock.tick(self.GAME_FPS);
+			self.clock.tick(self.GAME_FPS)
 
 			for e in pygame.event.get():
 				if (e.type == pygame.QUIT):
@@ -110,7 +110,7 @@ class GameWorld:
 				elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
 					if self.state == self.STATE_MENU or self.state == self.STATE_FINISHED:
 						self.menu.checkClick(pygame.mouse.get_pos(), self)
-			
+
 			if (self.state == self.STATE_PLAYING):
 				self.update();
 				self.draw();
@@ -143,7 +143,7 @@ class GameWorld:
 
 		self.music_player.update()
 		self.player.update()
-		
+
 		if (self.player.checkCollision(self.obstacles, self.scenebuf_delta_x) != False):
 			self.player.startAnimationDeath();
 
@@ -185,7 +185,10 @@ class GameWorld:
 
 		dst_surface.blit(bg, dst_rect, Rect(bgsrcx, 0, dst_rect.width, dst_rect.height))
 
-	def setPlayerInitialPhase(self):
+	def initPlayer(self):
+
+		# Set player initial phase
+
 		ftype = self.first_fluid.getType()
 		self.player.type = \
 			Character.CHARACTER_TYPE_FIRE \

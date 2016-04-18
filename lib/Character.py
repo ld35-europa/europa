@@ -9,7 +9,6 @@ from lib.Colors import Colors
 from pygame import Rect
 
 class Character(pygame.sprite.Sprite):
-
 	CHARACTER_TYPE_FIRE = 'fire';
 	CHARACTER_TYPE_WATER = 'water';
 
@@ -69,7 +68,7 @@ class Character(pygame.sprite.Sprite):
 		self.frame = 0
 
 	def startAnimationDeath(self):
-		pygame.mixer.find_channel().play(self.death_sound)
+		#pygame.mixer.find_channel().play(self.death_sound) # doesn't work for me
 		self.animation = self.ANIMATION_DEATH
 		self.frame = 0
 		self.state = self.CHARACTER_STATE_DEAD
@@ -150,7 +149,6 @@ class Character(pygame.sprite.Sprite):
 			self.rect = self.image.get_rect()
 			self.rect.height = self.rect.height / 2
 
-
 	def update(self):
 		time_between = pygame.time.get_ticks() - self.last_time;
 
@@ -203,13 +201,19 @@ class Character(pygame.sprite.Sprite):
 
 	def checkCollision(self, sprite_group, surfaces_delta_x):
 		def collision_detector(sprite1, sprite2):
-			if (type(sprite2) is lib.Fluid.Fluid):
-				return False
 			collrect = Rect(sprite2.rect)
-			collrect.left += surfaces_delta_x			
-			return (sprite1.rect.colliderect(collrect))
 
-		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1, collision_detector):
+			# Some grace distance on left / right for Obstacle
+
+			if (type(sprite2) is lib.Obstacle.Obstacle):
+				coll_grace = collrect.width / 3
+				collrect.left += surfaces_delta_x
+				collrect.left += coll_grace
+				collrect.width -= (coll_grace * 2)
+
+			return sprite1.rect.colliderect(collrect)
+
+		for sprite in pygame.sprite.spritecollide(self, sprite_group, 0, collision_detector):
 			return sprite
 		return False;
 
