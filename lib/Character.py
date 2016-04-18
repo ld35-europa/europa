@@ -68,7 +68,7 @@ class Character(pygame.sprite.Sprite):
 		self.frame = 0
 
 	def startAnimationDeath(self):
-		#pygame.mixer.find_channel().play(self.death_sound) # doesn't work for me
+		pygame.mixer.find_channel().play(self.death_sound)
 		self.animation = self.ANIMATION_DEATH
 		self.frame = 0
 		self.state = self.CHARACTER_STATE_DEAD
@@ -92,7 +92,7 @@ class Character(pygame.sprite.Sprite):
 			death_frames = self.FRAMES_DEATH_FIRE;
 
 		if (self.frame + 1 <= death_frames):
-			self.frame += 1;
+			self.frame += 1
 			self.createCharater();
 		else:
 			self.animation = self.ANIMATION_NONE;
@@ -210,10 +210,15 @@ class Character(pygame.sprite.Sprite):
 				collrect.left += surfaces_delta_x
 				collrect.left += coll_grace
 				collrect.width -= (coll_grace * 2)
+				
+			# Don't check fluid for now, b0rked
+
+			else:
+				return False
 
 			return sprite1.rect.colliderect(collrect)
 
-		for sprite in pygame.sprite.spritecollide(self, sprite_group, 0, collision_detector):
+		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1, collision_detector):
 			return sprite
 		return False;
 
