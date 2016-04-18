@@ -20,12 +20,12 @@ class GameWorld:
 	GAME_WIDTH = 1280
 	GAME_HEIGHT = 800
 	GAME_DIMENSION = [GAME_WIDTH, GAME_HEIGHT]
-	GAME_VELOCITY_X = 2;
 
 	SCENE_BUF_WIDTH = GAME_WIDTH*2
 	SCENE_BUF_HEIGHT = GAME_HEIGHT
 	GAME_FPS = 120;
 	ANIMATION_FPS = GAME_FPS / 3;
+	VELOCITY_ACCELERATION = 0.05
 
 	FLUID_MIN_W = 400
 	FLUID_MAX_W = 1000
@@ -57,7 +57,7 @@ class GameWorld:
 		self.scenebuf = Surface((self.SCENE_BUF_WIDTH, self.SCENE_BUF_HEIGHT))
 		self.backbuf = Surface((self.GAME_WIDTH, self.GAME_HEIGHT))
 
-		self.velocity = self.GAME_VELOCITY_X
+		self.velocity = 0
 		self.scenebuf_delta_x = 0 # x delta to backbuffer
 
 		self.player = Character()
@@ -68,6 +68,7 @@ class GameWorld:
 
 		self.music_player = MusicPlayer(self.player)
 		self.clock  = pygame.time.Clock();
+		self.game_start_t = 0
 		self.destroyed = False
 
 		# Initial backgrounds
@@ -80,6 +81,7 @@ class GameWorld:
 	def start(self):
 		self.generateScene()
 		self.initPlayer()
+		self.updateVelocity(True)
 
 		while (not self.destroyed):
 			self.clock.tick(self.GAME_FPS)
@@ -134,7 +136,8 @@ class GameWorld:
 			self.player.state == self.player.CHARACTER_STATE_DEAD\
 		):
 			self.state = self.STATE_FINISHED
-
+		
+		self.updateVelocity()
 		self.music_player.update()
 		self.player.update()
 		
@@ -239,6 +242,14 @@ class GameWorld:
 			Character.CHARACTER_TYPE_FIRE \
 			if ftype == Fluid.FLUID_TYPE_LAVA \
 			else Character.CHARACTER_TYPE_WATER
+
+	def updateVelocity(self, reset=False):
+		if (reset):
+			self.game_start_t = pygame.time.get_ticks()
+
+		t = pygame.time.get_ticks()
+		dt = t - self.game_start_t
+		self.velocity = ((dt / 1000.0) * self.VELOCITY_ACCELERATION) + 1
 
 	def destroy(self):
 		self.destroyed = True
