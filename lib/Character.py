@@ -201,24 +201,24 @@ class Character(pygame.sprite.Sprite):
 
 	def checkCollision(self, sprite_group, surfaces_delta_x):
 		def collision_detector(sprite1, sprite2):
-			collrect = Rect(sprite2.rect)
-
+			assert(type(sprite1) is lib.Character.Character)
+			
+			collrect = Rect(sprite2.rect)			
+			collrect.left += surfaces_delta_x
+			
 			# Some grace distance on left / right for Obstacle
 
 			if (type(sprite2) is lib.Obstacle.Obstacle):
+				if (lib.GameWorld.GameWorld.DEBUG_NOCOLL_OBSTACLES):
+					return False
+				
 				coll_grace = collrect.width / 3
-				collrect.left += surfaces_delta_x
 				collrect.left += coll_grace
 				collrect.width -= (coll_grace * 2)
-				
-			# Don't check fluid for now, b0rked
-
-			else:
-				return False
 
 			return sprite1.rect.colliderect(collrect)
 
-		for sprite in pygame.sprite.spritecollide(self, sprite_group, 1, collision_detector):
+		for sprite in (pygame.sprite.spritecollide(self, sprite_group, 0, collision_detector)):
 			return sprite
 		return False;
 

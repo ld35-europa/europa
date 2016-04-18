@@ -40,8 +40,9 @@ class GameWorld:
 	STATE_FINISHED = 2
 	STATE_MENU = 3
 	
-	DEBUG_COLL_OBSTACLES = False
-	DEBUG_COLL_FLUIDS = False
+	DEBUG_NOCOLL_OBSTACLES = False
+	DEBUG_RECT_OBSTACLES = False
+	DEBUG_RECT_FLUIDS = False
 
 	state = STATE_MENU
 
@@ -57,7 +58,7 @@ class GameWorld:
 		self.backbuf = Surface((self.GAME_WIDTH, self.GAME_HEIGHT))
 
 		self.velocity = self.GAME_VELOCITY_X
-		self.scenebuf_delta_x = 0
+		self.scenebuf_delta_x = 0 # x delta to backbuffer
 
 		self.player = Character()
 		self.obstacles = pygame.sprite.Group()
@@ -136,23 +137,28 @@ class GameWorld:
 
 		self.music_player.update()
 		self.player.update()
-
-		if (self.player.checkCollision(self.obstacles, self.scenebuf_delta_x) != False):
+		
+		obstacleCollisionSprite = self.player.checkCollision(self.obstacles, self.scenebuf_delta_x)
+		if (obstacleCollisionSprite != False):
+			self.obstacles.remove(obstacleCollisionSprite)
 			self.player.startAnimationDeath();
 
-		if (self.fluids != None):
-			fluidCollisionSprite = self.player.checkCollision(self.fluids, self.scenebuf_delta_x);
-			if (fluidCollisionSprite != False):
-				if (\
-					fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_LAVA and \
-					self.player.type == self.player.CHARACTER_TYPE_WATER \
-				):
-					self.player.startAnimationDeath();
-				elif (\
-					fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_WATER and \
-					self.player.type == self.player.CHARACTER_TYPE_FIRE \
-				):
-					self.player.startAnimationDeath();
+		fluidCollisionSprite = \
+			self.player.checkCollision(self.fluids, self.scenebuf_delta_x);
+			
+		if (fluidCollisionSprite != False):
+			if (\
+				fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_LAVA and \
+				self.player.type == self.player.CHARACTER_TYPE_WATER \
+			):
+				self.fluids.remove(fluidCollisionSprite)
+				self.player.startAnimationDeath();
+			elif (\
+				fluidCollisionSprite.ftype == Fluid.FLUID_TYPE_WATER and \
+				self.player.type == self.player.CHARACTER_TYPE_FIRE \
+			):
+				self.fluids.remove(fluidCollisionSprite)
+				self.player.startAnimationDeath();
 
 	def draw(self):
 
@@ -186,9 +192,9 @@ class GameWorld:
 				return Colors.RED
 			return Colors.BLUE
 		
-		if (self.obstacles and self.DEBUG_COLL_OBSTACLES):
+		if (self.obstacles and self.DEBUG_RECT_OBSTACLES):
 			drawDebugRects(self.obstacles, getObstacleColor)
-		if (self.fluids and self.DEBUG_COLL_FLUIDS):
+		if (self.fluids and self.DEBUG_RECT_FLUIDS):
 			drawDebugRects(self.fluids, getFluidColor)
 
 	def getVelocity(self):
