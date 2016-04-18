@@ -90,26 +90,26 @@ class GameWorld:
 					sys.exit(0);
 				elif (e.type == pygame.KEYDOWN):
 					if (self.player.state == self.player.CHARACTER_STATE_ALIVE):
-						if (e.key == pygame.K_2):
-							self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_FIRE)
-						if (e.key == pygame.K_3):
-							self.player.startAnimationTransform(self.player.ANIMATION_TRANSFORM_TO_WATER)
-						if e.key == pygame.K_SPACE:
+						if e.key == pygame.K_q:
+							self.player.transform()
+						elif e.key == pygame.K_SPACE:
 							self.player.startJump()
-						if (e.key == pygame.K_LEFT):
+						elif (e.key == pygame.K_LEFT):
 							self.player.inputx -= 1
-						if (e.key == pygame.K_RIGHT):
+						elif (e.key == pygame.K_RIGHT):
 							self.player.inputx += 1
 					if (e.key == pygame.K_ESCAPE):
 						sys.exit(0)
-					if (e.key == pygame.K_RETURN and (self.state == self.STATE_MENU or self.state == self.STATE_FINISHED)):
+					if (e.key == pygame.K_RETURN and \
+						(self.state == self.STATE_MENU or self.state == self.STATE_FINISHED) \
+					):
 						self.menu.createNew(self)
 				elif (e.type == pygame.KEYUP):
 					if e.key == pygame.K_SPACE:
 						self.player.jumping = False
-					if (e.key == pygame.K_LEFT):
+					elif (e.key == pygame.K_LEFT):
 						self.player.inputx += 1
-					if (e.key == pygame.K_RIGHT):
+					elif (e.key == pygame.K_RIGHT):
 						self.player.inputx -= 1
 				elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
 					if self.state == self.STATE_MENU or self.state == self.STATE_FINISHED:

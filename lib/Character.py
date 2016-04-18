@@ -149,6 +149,12 @@ class Character(pygame.sprite.Sprite):
 			self.rect = self.image.get_rect()
 			self.rect.height = self.rect.height / 2
 
+	def transform(self):
+		if (self.type == self.CHARACTER_TYPE_WATER):
+			self.startAnimationTransform(self.ANIMATION_TRANSFORM_TO_FIRE)
+		else:
+			self.startAnimationTransform(self.ANIMATION_TRANSFORM_TO_WATER)
+
 	def update(self):
 		time_between = pygame.time.get_ticks() - self.last_time;
 
