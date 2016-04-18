@@ -39,6 +39,9 @@ class GameWorld:
 	STATE_PAUSED = 1
 	STATE_FINISHED = 2
 	STATE_MENU = 3
+	
+	DEBUG_COLL_OBSTACLES = False
+	DEBUG_COLL_FLUIDS = False
 
 	state = STATE_MENU
 
@@ -57,8 +60,8 @@ class GameWorld:
 		self.scenebuf_delta_x = 0
 
 		self.player = Character()
-		self.obstacles = None
-		self.fluids = None
+		self.obstacles = pygame.sprite.Group()
+		self.fluids = pygame.sprite.Group()
 		self.first_fluid = None
 		self.last_fluid = None
 
@@ -121,20 +124,10 @@ class GameWorld:
 	def update(self):
 		if (self.player.state == self.player.CHARACTER_STATE_ALIVE):
 			self.scenebuf_delta_x -= self.velocity
+			
 			if (self.scenebuf_delta_x < -self.GAME_WIDTH):
-
-				# Screenbuf depleted. Copy second half of scenebuf to first,
-				# generate new second half, set buf -> screen blit delta to 0
-
-				sbuf = self.scenebuf
-
-				self.fillBackground(sbuf, Rect(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
-				sbuf.blit(sbuf, (0, 0), Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT));
-
-				self.fillBackground(sbuf, Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
-				self.generateScene(self.GAME_WIDTH)
-
-				self.scenebuf_delta_x = 0
+				self.resetSceneBuffer()
+				
 		elif (\
 			self.player.animation == self.player.ANIMATION_NONE and \
 			self.player.state == self.player.CHARACTER_STATE_DEAD\
@@ -164,13 +157,59 @@ class GameWorld:
 	def draw(self):
 
 		# scenebuf -> backbuf -> screen
-
+		
 		self.backbuf.blit(self.scenebuf, (self.scenebuf_delta_x, 0));
+		self.drawBackbufDebug()
 		self.player.draw(self.backbuf);
 		self.screen.blit(self.backbuf, (0, 0))
 
+	def drawBackbufDebug(self):
+		
+		# Helper function to draw debug rectangles. If color is a
+		# callable, receives a sprite as the argument and is expected
+		# to return a color
+		
+		def drawDebugRects(sgroup, color_cb):
+			for s in (sgroup):
+				color = color_cb(s)
+								
+				srect = Rect(s.rect)
+				srect.left += self.scenebuf_delta_x
+				srect.top = self.GAME_HEIGHT - 50
+				self.backbuf.fill(color, srect)
+		
+		def getObstacleColor(s):
+			return Colors.GREEN
+			
+		def getFluidColor(s):
+			if (s.getType() == Fluid.FLUID_TYPE_LAVA):
+				return Colors.RED
+			return Colors.BLUE
+		
+		if (self.obstacles and self.DEBUG_COLL_OBSTACLES):
+			drawDebugRects(self.obstacles, getObstacleColor)
+		if (self.fluids and self.DEBUG_COLL_FLUIDS):
+			drawDebugRects(self.fluids, getFluidColor)
+
 	def getVelocity(self):
 		return self.velocity
+
+	def resetSceneBuffer(self):
+		
+		# Screenbuf depleted. Copy second half of scenebuf to first,
+		# generate new second half, set buf -> screen blit delta to 0
+
+		sbuf = self.scenebuf
+
+		self.fillBackground(sbuf, Rect(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
+		sbuf.blit(sbuf, (0, 0), Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT));
+
+		self.fillBackground(sbuf, Rect(self.GAME_WIDTH, 0, self.GAME_WIDTH, self.GAME_HEIGHT))
+		self.updateSpriteRects(self.obstacles)
+		self.updateSpriteRects(self.fluids)
+		self.generateScene(self.GAME_WIDTH)
+
+		self.scenebuf_delta_x = 0
 
 	def fillBackground(self, dst_surface, dst_rect):
 
@@ -197,8 +236,6 @@ class GameWorld:
 
 	def destroy(self):
 		self.destroyed = True
-		#self.music_player.music_fire.stop()
-		#self.music_player.music_water.stop()
 
 	def generateScene(self, startx=0):
 
@@ -236,8 +273,6 @@ class GameWorld:
 		# Generate fluid pools (Fluid class) according to the
 		# passed Rect list
 
-		self.fluids = pygame.sprite.Group();
-
 		for r in (rects):
 			f = None
 
@@ -259,11 +294,6 @@ class GameWorld:
 			f.draw(self.scenebuf, r)
 
 	def generateObstacles(self, rects):
-
-		# Generate obstacles between the passed rects
-
-		self.obstacles = pygame.sprite.Group();
-
 		for r in rects:
 			if (r == rects[-1]):
 				break
@@ -276,4 +306,16 @@ class GameWorld:
 			obstacle = Obstacle(w, h)
 			obstacle.draw(self.scenebuf, x)
 			self.obstacles.add(obstacle)
-
+	
+	def updateSpriteRects(self, spritegroup):
+		
+		# Update sprite rectangles at new scene portion generation. The new
+		# portion of the scene is generated to the second half of the scenebuf
+		# (W=GAME_WIDTH*2), while all old sprites are blitted to the first half of
+		# the scenebuf. Hence, subtract GAME_WIDTH from the rect x of each. Also
+		# clean up old sprites far off the left of the scene.
+		
+		for s in (spritegroup):
+			s.rect.left -= self.GAME_WIDTH
+			if (s.rect.right < -self.GAME_WIDTH):
+				spritegroup.remove(s)
