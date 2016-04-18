@@ -5,6 +5,7 @@ import sys
 import time
 import random
 
+from pygame.font import Font
 from pygame import Surface
 from pygame import Rect
 
@@ -26,6 +27,9 @@ class GameWorld:
 	GAME_FPS = 120;
 	ANIMATION_FPS = GAME_FPS / 3;
 	ACCELERATION = 0.05
+	CLOCK_FONT = "assets/fonts/gamefont.ttf"
+	CLOCK_FONT_SIZE = 48
+	CLOCK_PADDING = 20
 
 	FLUID_MIN_W = 400
 	FLUID_MAX_W = 1000
@@ -68,6 +72,7 @@ class GameWorld:
 
 		self.music_player = MusicPlayer(self.player)
 		self.clock  = pygame.time.Clock();
+		self.font = None
 		self.game_start_t = 0
 		self.destroyed = False
 
@@ -169,6 +174,7 @@ class GameWorld:
 		
 		self.backbuf.blit(self.scenebuf, (self.scenebuf_delta_x, 0));
 		self.drawBackbufDebug()
+		self.drawClock()
 		self.player.draw(self.backbuf);
 		self.screen.blit(self.backbuf, (0, 0))
 
@@ -199,7 +205,24 @@ class GameWorld:
 			drawDebugRects(self.obstacles, getObstacleColor)
 		if (self.fluids and self.DEBUG_RECT_FLUIDS):
 			drawDebugRects(self.fluids, getFluidColor)
-
+	
+	def drawClock(self):
+		if (not pygame.font.get_init()):
+			return
+		if (not self.font):
+			self.font = Font(self.CLOCK_FONT, self.CLOCK_FONT_SIZE)
+		
+		font = self.font
+		dt = pygame.time.get_ticks() - self.game_start_t
+		dt_str = str(dt / 1000)
+		clocksfc = font.render(dt_str, False, Colors.WHITE, Colors.GREEN).convert(32)
+		src_rect = clocksfc.get_rect()
+		dst_rect = self.backbuf.get_rect()
+		x = dst_rect.width - src_rect.width - self.CLOCK_PADDING
+		
+		clocksfc.set_colorkey(Colors.GREEN)
+		self.backbuf.blit(clocksfc, (x, self.CLOCK_PADDING))
+	
 	def getVelocity(self):
 		return self.velocity
 

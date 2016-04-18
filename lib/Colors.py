@@ -8,6 +8,8 @@ class Colors:
 	GREEN = pygame.Color(0, 255, 0)
 	BLUE = pygame.Color(0, 0, 255)
 	BLACK = pygame.Color(0, 0, 0)
+	WHITE = pygame.Color(255, 255, 255)
+	TRANSPARENT = pygame.Color(0, 0, 0, 255)
 
 def getRandColor():
 	return (int(random()*256), int(random()*256), int(random()*256))
