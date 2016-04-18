@@ -25,7 +25,7 @@ class GameWorld:
 	SCENE_BUF_HEIGHT = GAME_HEIGHT
 	GAME_FPS = 120;
 	ANIMATION_FPS = GAME_FPS / 3;
-	VELOCITY_ACCELERATION = 0.05
+	ACCELERATION = 0.05
 
 	FLUID_MIN_W = 400
 	FLUID_MAX_W = 1000
@@ -249,7 +249,7 @@ class GameWorld:
 
 		t = pygame.time.get_ticks()
 		dt = t - self.game_start_t
-		self.velocity = ((dt / 1000.0) * self.VELOCITY_ACCELERATION) + 1
+		self.velocity = ((dt / 1000.0) * self.ACCELERATION) + 1
 
 	def destroy(self):
 		self.destroyed = True
